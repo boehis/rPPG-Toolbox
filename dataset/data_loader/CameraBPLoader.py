@@ -11,7 +11,7 @@ from tqdm import tqdm
 import pandas as pd
 
 
-class iBVPLoader(BaseLoader):
+class CameraBPLoader(BaseLoader):
     """The data loader for the CameraBP dataset."""
 
     def __init__(self, name, data_path, config_data):
@@ -49,7 +49,7 @@ class iBVPLoader(BaseLoader):
             raise ValueError(self.dataset_name + " data paths empty!")
         dirs = list()
         for data_dir in data_dirs:
-            subject = int(os.path.split(data_dir)[-1].split('_')[0])
+            subject = os.path.split(data_dir)[-1].split('_')[0]
             index = os.path.split(data_dir)[-1].split('.')[0]
 
             # Split Phases: Read the CSV file to extract the phase start time
@@ -71,7 +71,7 @@ class iBVPLoader(BaseLoader):
 
             for i, start_time in enumerate(phase_start_times):
                 phase_name = phase_names[i]
-                end_time = phase_start_times[i+1] if i < len(phase_start_times)-1 else experiment_end_time 
+                end_time = phase_start_times[i+1] if i < len(phase_start_times)-1 else (experiment_end_time-experiment_start_time) 
 
                 dirs.append({
                     "index": f"{subject}_{phase_name}_{i}",
@@ -82,6 +82,8 @@ class iBVPLoader(BaseLoader):
                     "start_time_s": start_time.round(2), # Round to 100th of a second matching the video frame rate of 100fps
                     "end_time_s": end_time.round(2) # Round to 100th of a second matching the video frame rate of 100fps
                 })
+                print("index", f"{subject}_{phase_name}_{i}", "duration_m:", (end_time.round(2)-start_time.round(2))/60)
+                
         return dirs
 
     def split_raw_data(self, data_dirs, begin, end):
@@ -101,13 +103,17 @@ class iBVPLoader(BaseLoader):
 
     def preprocess_dataset_subprocess(self, data_dirs, config_preprocess, i, file_list_dict):
         """ Invoked by preprocess_dataset for multi_process. """
+        print("i", i)
         saved_filename = data_dirs[i]['index']
 
+        print("load_f")
         frames = self.read_video(
             video_file=     os.path.join(data_dirs[i]['path'], f"{data_dirs[i]['subject']}_basler_face.mp4"),
             start_time_s=   data_dirs[i]['start_time_s'],
-            end_time_s=     data_dirs[i]['end_time_s']
+            #end_time_s=     data_dirs[i]['end_time_s']
+            end_time_s=     data_dirs[i]['start_time_s']+1
             )
+        print(frames.shape)
 
         # Read Labels
         bvps = self.read_wave(
@@ -115,14 +121,17 @@ class iBVPLoader(BaseLoader):
             start_time_s=   data_dirs[i]['start_time_s'],
             end_time_s=     data_dirs[i]['end_time_s']
             )
+        print(bvps.shape)
 
         target_length = frames.shape[0]
         bvps = BaseLoader.resample_ppg(bvps, target_length)
 
-
+        print("prep")
         frames_clips, bvps_clips = self.preprocess(frames, bvps, config_preprocess)
+        print("frames_clips", frames_clips.shape)
         input_name_list, label_name_list = self.save_multi_process(frames_clips, bvps_clips, saved_filename)
         file_list_dict[i] = input_name_list
+        print(file_list_dict)
 
     @staticmethod
     def read_video(video_file, start_time_s, end_time_s):
