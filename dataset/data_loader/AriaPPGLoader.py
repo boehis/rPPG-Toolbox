@@ -86,22 +86,37 @@ class AriaPPGLoader(BaseLoader):
         filename = os.path.split(data_dirs[i]['path'])[-1]
         saved_filename = data_dirs[i]['index']
 
+        print("Read Frames")
         # Read Frames
         frames = self.read_video(
             os.path.join(data_dirs[i]['path']))
 
+        print("Read frames with shape:", frames.shape)
+        print("Read frames with dtype:", frames.dtype)
+
+        print("Read Labels")
         # Read Labels
         if config_preprocess.USE_PSUEDO_PPG_LABEL:
+            print("using USE_PSUEDO_PPG_LABEL")
             bvps = self.generate_pos_psuedo_labels(frames, fs=self.config_data.FS)
         else:
             bvps = self.read_wave(
                 os.path.join(os.path.dirname(data_dirs[i]['path']),f"bvp_{saved_filename}.csv"))
 
         bvps = BaseLoader.resample_ppg(bvps, frames.shape[0])
-            
+
+        print("Read Labels with shape:", bvps.shape)
+
+        
         frames_clips, bvps_clips = self.preprocess(frames, bvps, config_preprocess)
+        frames_clips = frames_clips.astype(np.uint8)
+
+        print("Preprocess frames_clips with shape:", frames_clips.shape)
+        print("Preprocess frames_clips with dtype:", frames_clips.dtype)
+
         input_name_list, label_name_list = self.save_multi_process(frames_clips, bvps_clips, saved_filename)
         file_list_dict[i] = input_name_list
+        print(f"file_list_dict[{i}]:",file_list_dict[i])
 
     def load_preprocessed_data(self):
         """ Loads the preprocessed data listed in the file list.
@@ -138,18 +153,27 @@ class AriaPPGLoader(BaseLoader):
     @staticmethod
     def read_video(video_file):
         """Reads a video file, returns frames(T,H,W,3) """
-        cap = cv2.VideoCapture('./AriaPPG/P001/vid_P001_T1.mkv')
+        cap = cv2.VideoCapture(video_file)
+        if not cap.isOpened():
+            raise ValueError(f"Error: Could not open video file {video_file}")
 
         H = int(cap.get(cv2.CAP_PROP_FRAME_HEIGHT))
         W = int(cap.get(cv2.CAP_PROP_FRAME_WIDTH))
         T = int(cap.get(cv2.CAP_PROP_FRAME_COUNT))
         FPS = cap.get(cv2.CAP_PROP_FPS)
-        assert FPS == 30, "The FPS of the video is not 30. Please check the video file."
+        assert FPS == 30, f"The FPS of the video is {FPS}, not 30. Please check the video file."
 
 
         video = np.zeros((T, H, W, 3), dtype=np.uint8)
         #if memory is a problem, use memmap to store the video
-        # video = np.memmap('video.dat', dtype='uint8', mode='w+', shape=(T, H, W, 3))
+        #dat_file = video_file + '.dat'
+        #if os.path.exists(dat_file):
+        #    print("Read existing .dat file")
+        #    video = np.memmap(dat_file, dtype='uint8', mode='r+', shape=(T, H, W, 3))
+        #    cap.release()
+        #    return video
+        #    
+        #video = np.memmap(dat_file, dtype='uint8', mode='w+', shape=(T, H, W, 3))
 
         cap.set(cv2.CAP_PROP_POS_MSEC, 0)
         for frame_nr in range(T):
