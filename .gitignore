@@ -21,3 +21,4 @@ test.yaml
 dataset/CameraBP/
 dataset/AriaPPG/
 .ipynb_checkpoints
+*.out

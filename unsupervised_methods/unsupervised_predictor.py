@@ -10,6 +10,8 @@ from unsupervised_methods.methods.POS_WANG import *
 from unsupervised_methods.methods.OMIT import *
 from tqdm import tqdm
 from evaluation.BlandAltmanPy import BlandAltman
+import re
+import pandas as pd
 
 def unsupervised_predict(config, data_loader, method_name):
     """ Model evaluation on the testing dataset."""
@@ -22,6 +24,7 @@ def unsupervised_predict(config, data_loader, method_name):
     gt_hr_fft_all = []
     SNR_all = []
     MACC_all = []
+    results = []
     sbar = tqdm(data_loader["unsupervised"], ncols=80)
     for _, test_batch in enumerate(sbar):
         batch_size = test_batch[0].shape[0]
@@ -67,6 +70,20 @@ def unsupervised_predict(config, data_loader, method_name):
                     predict_hr_peak_all.append(pre_hr)
                     SNR_all.append(SNR)
                     MACC_all.append(macc)
+
+                    results.append({
+                        "CAM": "head" if "head" in test_batch[2][0] else "stat",
+                        "PID": re.search(r"P\d{3}", test_batch[2][0]).group(0),
+                        "TID": re.search(r"T\d", test_batch[2][0]).group(0),
+                        "slice": int(test_batch[3][0]),
+                        "batch_idx": idx,
+                        "eval_window": i,
+                        "method_name": method_name,
+                        "gt_hr": gt_hr,
+                        "pre_hr": pre_hr,
+                        "SNR": SNR,
+                        "macc": macc,
+                    })
                 elif config.INFERENCE.EVALUATION_METHOD == "FFT":
                     gt_fft_hr, pre_fft_hr, SNR, macc = calculate_metric_per_video(BVP_window, label_window, diff_flag=False,
                                                                     fs=config.UNSUPERVISED.DATA.FS, hr_method='FFT')
@@ -74,6 +91,20 @@ def unsupervised_predict(config, data_loader, method_name):
                     predict_hr_fft_all.append(pre_fft_hr)
                     SNR_all.append(SNR)
                     MACC_all.append(macc)
+                    
+                    results.append({
+                        "CAM": "head" if "head" in test_batch[2][0] else "stat",
+                        "PID": re.search(r"P\d{3}", test_batch[2][0]).group(0),
+                        "TID": re.search(r"T\d", test_batch[2][0]).group(0),
+                        "slice": int(test_batch[3][0]),
+                        "batch_idx": idx,
+                        "eval_window": i,
+                        "method_name": method_name,
+                        "gt_fft_hr": gt_fft_hr,
+                        "pre_fft_hr": pre_fft_hr,
+                        "SNR": SNR,
+                        "macc": macc,
+                    })
                 else:
                     raise ValueError("Inference evaluation method name wrong!")
     print("Used Unsupervised Method: " + method_name)
@@ -182,3 +213,5 @@ def unsupervised_predict(config, data_loader, method_name):
                 raise ValueError("Wrong Test Metric Type")
     else:
         raise ValueError("Inference evaluation method name wrong!")
+
+    return results

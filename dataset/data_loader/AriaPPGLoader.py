@@ -3,6 +3,8 @@
 import glob
 import os
 import re
+import math
+import multiprocessing
 from multiprocessing import Pool, Process, Value, Array, Manager
 
 import cv2
@@ -11,6 +13,10 @@ from dataset.data_loader.BaseLoader import BaseLoader
 from tqdm import tqdm
 import csv
 import pandas as pd
+
+import logging
+logging.basicConfig(level=logging.WARN, format='%(asctime)s - %(levelname)s - %(message)s')
+
 
 class AriaPPGLoader(BaseLoader):
     """The data loader for the AriaPPG dataset."""
@@ -21,32 +27,24 @@ class AriaPPGLoader(BaseLoader):
                 data_path(str): path of a folder which stores raw video and bvp data.
                 e.g. data_path should be "AriaPPG" for below dataset structure:
                 -----------------
-                     AriaPPG/
-                     |   |-- P001/
-                     |       |-- vid_P001_T1.mkv
-                     |       |-- vid_P001_T2.mkv
-                     |       |-- vid_P001_T3.mkv
-                     |       |...
-                     |       |-- bvp_P001_T1.csv
-                     |       |-- bvp_P001_T2.csv
-                     |       |-- bvp_P001_T3.csv
-                     |   |-- P002/
-                     |       |-- vid_P002_T1.mkv
-                     |       |-- vid_P002_T2.mkv
-                     |       |-- vid_P002_T3.mkv
-                     |       |...
-                     |       |-- bvp_P002_T1.csv
-                     |       |-- bvp_P002_T2.csv
-                     |       |-- bvp_P002_T3.csv
-                     |...
-                     |   |-- PNNN/
-                     |       |-- vid_Pnnn_T1.mkv
-                     |       |-- vid_Pnnn_T2.mkv
-                     |       |-- vid_Pnnn_T3.mkv
-                     |       |...
-                     |       |-- bvp_Pnnn_T1.csv
-                     |       |-- bvp_Pnnn_T2.csv
-                     |       |-- bvp_Pnnn_T3.csv
+                AriaPPG/
+                    ├── P001
+                    │   ├── T1
+                    │   │   ├── e4_BVP_P001_T1.csv
+                    │   │   ├── e4_EDA_P001_T1.csv
+                    │   │   ├── ...
+                    │   │   ├── head_camera-rgb_P001_T1.mkv
+                    │   │   ├── head_imu-left_P001_T1.csv
+                    │   │   ├── ...
+                    │   │   ├── stat_camera-rgb_P001_T1.mkv
+                    │   │   ├── stat_imu-left_P001_T1.csv
+                    │   │   ├── ...
+                    │   ├── ...
+                    ├── ...
+                    ├── PNNN
+                    │   ├── T1
+                    │   │   ├── ...
+                    │   ├── ...
                 -----------------
                 name(string): name of the dataloader.
                 config_data(CfgNode): data settings(ref:config.py).
@@ -56,15 +54,45 @@ class AriaPPGLoader(BaseLoader):
 
     def get_raw_data(self, data_path):
         """Returns data directories under the path(For AriaPPG dataset)."""
-        data_dirs = glob.glob(data_path + os.sep + "P[0-9][0-9][0-9]" + os.sep + "*.mkv")
+        data_dirs = glob.glob(os.path.join(data_path,"P[0-9][0-9][0-9]", "T[0-9]","*_camera-rgb_*.npy"))
         if not data_dirs:
             raise ValueError(self.dataset_name + " data paths empty!")
-        dirs = [{
-            "index": re.search('vid_(.*).mkv', data_dir).group(1),
-            "subject": re.search('vid_(.*)_(.*).mkv', data_dir).group(1),
-            "path": data_dir,
-            } for data_dir in data_dirs]
+
+        dirs = []
+        for data_dir in data_dirs:
+            match = re.search('^.*(head|stat)_camera-rgb_(P\d{3})_(T.*).npy$', data_dir)
+            cam_pos = match.group(1)
+            subject = match.group(2)
+            task = match.group(3)
+            dirs.append({
+                "index": cam_pos+subject+task,
+                "cam_pos": cam_pos,
+                "subject": subject,
+                "task": task,
+                "path": data_dir,
+            })
+        
         return dirs
+
+    def preprocess_dataset(self, data_dirs, config_preprocess, begin, end):
+        """Parses and preprocesses all the raw data based on split.
+
+        Args:
+            data_dirs(List[str]): a list of video_files.
+            config_preprocess(CfgNode): preprocessing settings(ref:config.py).
+            begin(float): index of begining during train/val split.
+            end(float): index of ending during train/val split.
+        """
+        data_dirs_split = self.split_raw_data(data_dirs, begin, end)  # partition dataset 
+        # send data directories to be processed
+
+        # Get the number of CPUs allocated to your job
+        num_cores = int(os.getenv('SLURM_CPUS_PER_TASK', default=1))
+        logging.debug("Num avail cores:", num_cores)
+        file_list_dict = self.multi_process_manager(data_dirs_split, config_preprocess, multi_process_quota=num_cores)
+        self.build_file_list(file_list_dict)  # build file list
+        self.load_preprocessed_data()  # load all data and corresponding labels (sorted for consistency)
+        logging.debug("Total Number of raw files preprocessed:", len(data_dirs_split), end='\n\n')
 
     def split_raw_data(self, data_dirs, begin, end):
         """Returns a subset of data dirs, split with begin and end values, 
@@ -83,40 +111,35 @@ class AriaPPGLoader(BaseLoader):
 
     def preprocess_dataset_subprocess(self, data_dirs, config_preprocess, i, file_list_dict):
         """   invoked by preprocess_dataset for multi_process.   """
-        filename = os.path.split(data_dirs[i]['path'])[-1]
-        saved_filename = data_dirs[i]['index']
+        index = data_dirs[i]['index']
+        cam_pos = data_dirs[i]['cam_pos']
+        subject = data_dirs[i]['subject']
+        task = data_dirs[i]['task']
+        path = data_dirs[i]['path']
+        
 
-        print("Read Frames")
         # Read Frames
-        frames = self.read_video(
-            os.path.join(data_dirs[i]['path']))
+        frames = self.read_video(path)
 
-        print("Read frames with shape:", frames.shape)
-        print("Read frames with dtype:", frames.dtype)
+        logging.debug("Read frames with shape:", frames.shape)
+        logging.debug("Read frames with dtype:", frames.dtype)
 
-        print("Read Labels")
         # Read Labels
-        if config_preprocess.USE_PSUEDO_PPG_LABEL:
-            print("using USE_PSUEDO_PPG_LABEL")
-            bvps = self.generate_pos_psuedo_labels(frames, fs=self.config_data.FS)
-        else:
-            bvps = self.read_wave(
-                os.path.join(os.path.dirname(data_dirs[i]['path']),f"bvp_{saved_filename}.csv"))
+        bvps = self.read_wave(
+                os.path.join(os.path.dirname(path),f"e4_BVP_{subject}_{task}.npy"))
 
         bvps = BaseLoader.resample_ppg(bvps, frames.shape[0])
 
-        print("Read Labels with shape:", bvps.shape)
+        logging.debug("Read Labels with shape:", bvps.shape)
 
         
         frames_clips, bvps_clips = self.preprocess(frames, bvps, config_preprocess)
-        frames_clips = frames_clips.astype(np.uint8)
 
-        print("Preprocess frames_clips with shape:", frames_clips.shape)
-        print("Preprocess frames_clips with dtype:", frames_clips.dtype)
+        logging.debug("Preprocess frames_clips with shape:", frames_clips.shape)
+        logging.debug("Preprocess frames_clips with dtype:", frames_clips.dtype)
 
-        input_name_list, label_name_list = self.save_multi_process(frames_clips, bvps_clips, saved_filename)
+        input_name_list, label_name_list = self.save_multi_process(frames_clips, bvps_clips, index)
         file_list_dict[i] = input_name_list
-        print(f"file_list_dict[{i}]:",file_list_dict[i])
 
     def load_preprocessed_data(self):
         """ Loads the preprocessed data listed in the file list.
@@ -150,41 +173,14 @@ class AriaPPGLoader(BaseLoader):
         self.labels = labels
         self.preprocessed_data_len = len(filtered_inputs)
 
+        print(filtered_inputs)
+
     @staticmethod
     def read_video(video_file):
         """Reads a video file, returns frames(T,H,W,3) """
-        cap = cv2.VideoCapture(video_file)
-        if not cap.isOpened():
-            raise ValueError(f"Error: Could not open video file {video_file}")
-
-        H = int(cap.get(cv2.CAP_PROP_FRAME_HEIGHT))
-        W = int(cap.get(cv2.CAP_PROP_FRAME_WIDTH))
-        T = int(cap.get(cv2.CAP_PROP_FRAME_COUNT))
-        FPS = cap.get(cv2.CAP_PROP_FPS)
-        assert FPS == 30, f"The FPS of the video is {FPS}, not 30. Please check the video file."
-
-
-        video = np.zeros((T, H, W, 3), dtype=np.uint8)
-        #if memory is a problem, use memmap to store the video
-        #dat_file = video_file + '.dat'
-        #if os.path.exists(dat_file):
-        #    print("Read existing .dat file")
-        #    video = np.memmap(dat_file, dtype='uint8', mode='r+', shape=(T, H, W, 3))
-        #    cap.release()
-        #    return video
-        #    
-        #video = np.memmap(dat_file, dtype='uint8', mode='w+', shape=(T, H, W, 3))
-
-        cap.set(cv2.CAP_PROP_POS_MSEC, 0)
-        for frame_nr in range(T):
-            ret, frame = cap.read()
-            if not ret:
-                raise ValueError(f"Error reading frame {frame_nr} from video {video_file}")
-            video[frame_nr] = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
-        cap.release()
-        return video
+        return np.load(video_file).astype(np.float32)/255
 
     @staticmethod
     def read_wave(bvp_file):
         """Reads a bvp signal file."""
-        return pd.read_csv(bvp_file, header=None)[0].values
+        return np.load(bvp_file)

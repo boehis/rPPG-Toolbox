@@ -22,7 +22,9 @@ import numpy as np
 import pandas as pd
 from torch.utils.data import Dataset
 from tqdm import tqdm
-from retinaface import RetinaFace   # Source code: https://github.com/serengil/retinaface
+from retinaface import RetinaFace   # Source code:https://github.com/serengil/retinaface
+import logging
+logging.basicConfig(level=logging.WARN, format='%(asctime)s - %(levelname)s - %(message)s')
 
 
 class BaseLoader(Dataset):
@@ -380,7 +382,7 @@ class BaseLoader(Dataset):
             face_region_median = np.median(face_region_all, axis=0).astype('int')
 
         # Frame Resizing
-        resized_frames = np.zeros((frames.shape[0], height, width, 3))
+        resized_frames = np.zeros((frames.shape[0], height, width, 3), dtype=frames.dtype)
         for i in range(0, frames.shape[0]):
             frame = frames[i]
             if use_dynamic_detection:  # use the (i // detection_freq)-th facial region.
@@ -499,6 +501,7 @@ class BaseLoader(Dataset):
                     p_list.append(p)
                     running_num += 1
                     process_flag = False
+                    logging.debug("Spawn process. Total running=",running_num)
                 for p_ in p_list:
                     if not p_.is_alive():
                         p_list.remove(p_)

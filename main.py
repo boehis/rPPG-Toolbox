@@ -3,8 +3,10 @@
 import argparse
 import random
 import time
+import os
 
 import numpy as np
+import pandas as pd
 import torch
 from config import get_config
 from dataset import data_loader
@@ -107,24 +109,29 @@ def test(config, data_loader_dict):
 def unsupervised_method_inference(config, data_loader):
     if not config.UNSUPERVISED.METHOD:
         raise ValueError("Please set unsupervised method in yaml!")
+    all_results = []
     for unsupervised_method in config.UNSUPERVISED.METHOD:
         if unsupervised_method == "POS":
-            unsupervised_predict(config, data_loader, "POS")
+            results = unsupervised_predict(config, data_loader, "POS")
         elif unsupervised_method == "CHROM":
-            unsupervised_predict(config, data_loader, "CHROM")
+            results = unsupervised_predict(config, data_loader, "CHROM")
         elif unsupervised_method == "ICA":
-            unsupervised_predict(config, data_loader, "ICA")
+            results = unsupervised_predict(config, data_loader, "ICA")
         elif unsupervised_method == "GREEN":
-            unsupervised_predict(config, data_loader, "GREEN")
+            results = unsupervised_predict(config, data_loader, "GREEN")
         elif unsupervised_method == "LGI":
-            unsupervised_predict(config, data_loader, "LGI")
+            results = unsupervised_predict(config, data_loader, "LGI")
         elif unsupervised_method == "PBV":
-            unsupervised_predict(config, data_loader, "PBV")
+            results = unsupervised_predict(config, data_loader, "PBV")
         elif unsupervised_method == "OMIT":
-            unsupervised_predict(config, data_loader, "OMIT")
+            results = unsupervised_predict(config, data_loader, "OMIT")
         else:
             raise ValueError("Not supported unsupervised method!")
 
+        all_results.extend(results)
+    all_results = pd.DataFrame(all_results)
+    os.makedirs(config.UNSUPERVISED.OUTPUT_SAVE_DIR, exist_ok=True)
+    all_results.to_csv(os.path.join(config.UNSUPERVISED.OUTPUT_SAVE_DIR,"all_results.csv"))
 
 if __name__ == "__main__":
     # parse arguments.
