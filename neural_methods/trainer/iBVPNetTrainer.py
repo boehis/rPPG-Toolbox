@@ -31,6 +31,14 @@ class iBVPNetTrainer(BaseTrainer):
 
         self.model = iBVPNet(
             frames=config.MODEL.iBVPNET.FRAME_NUM).to(self.device)  # [3, T, 128,128]
+        
+        if config.MODEL.RESUME != '':
+            if not os.path.exists(config.MODEL.RESUME):
+                raise ValueError("Pretrained model path error! Please check MODEL.RESUME in your yaml.")
+            self.model.load_state_dict(torch.load(config.MODEL.RESUME, map_location='cuda:0'))
+            print("Finetuning uses pretrained model!")
+            print(config.MODEL.RESUME)
+
 
         if config.TOOLBOX_MODE == "train_and_test":
             self.num_train_batches = len(data_loader["train"])
@@ -149,7 +157,7 @@ class iBVPNetTrainer(BaseTrainer):
         if self.config.TOOLBOX_MODE == "only_test":
             if not os.path.exists(self.config.INFERENCE.MODEL_PATH):
                 raise ValueError("Inference model path error! Please check INFERENCE.MODEL_PATH in your yaml.")
-            self.model.load_state_dict(torch.load(self.config.INFERENCE.MODEL_PATH))
+            self.model.load_state_dict(torch.load(self.config.INFERENCE.MODEL_PATH, map_location='cuda:0'))
             print("Testing uses pretrained model!")
             print(self.config.INFERENCE.MODEL_PATH)
         else:

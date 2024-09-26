@@ -6,7 +6,7 @@ import numpy as np
 import torch
 import torch.optim as optim
 from evaluation.metrics import calculate_metrics
-from neural_methods.loss.PhysNetNegPearsonLoss import Neg_Pearson
+from neural_methods.loss.PhysNetNegPearsonLoss import get_loss, TALOSLoss
 from neural_methods.model.PhysNet import PhysNet_padding_Encoder_Decoder_MAX
 from neural_methods.trainer.BaseTrainer import BaseTrainer
 from torch.autograd import Variable
@@ -31,15 +31,26 @@ class PhysnetTrainer(BaseTrainer):
 
         self.model = PhysNet_padding_Encoder_Decoder_MAX(
             frames=config.MODEL.PHYSNET.FRAME_NUM).to(self.device)  # [3, T, 128,128]
-
+        
         if config.TOOLBOX_MODE == "train_and_test":
+            if config.MODEL.RESUME != '':
+                if not os.path.exists(config.MODEL.RESUME):
+                    raise ValueError("Pretrained model path error! Please check MODEL.RESUME in your yaml.")
+                self.model.load_state_dict(torch.load(config.MODEL.RESUME))
+                print("Finetuning uses pretrained model!")
+                print(config.MODEL.RESUME)
+
             self.num_train_batches = len(data_loader["train"])
-            self.loss_model = Neg_Pearson()
+
+            self.loss_model_train = get_loss(config.MODEL.PHYSNET.LOSS_TRAIN)
+            self.loss_model_val = get_loss(config.MODEL.PHYSNET.LOSS_TRAIN)
+            
             self.optimizer = optim.Adam(
                 self.model.parameters(), lr=config.TRAIN.LR)
             # See more details on the OneCycleLR scheduler here: https://pytorch.org/docs/stable/generated/torch.optim.lr_scheduler.OneCycleLR.html
-            self.scheduler = torch.optim.lr_scheduler.OneCycleLR(
-                self.optimizer, max_lr=config.TRAIN.LR, epochs=config.TRAIN.EPOCHS, steps_per_epoch=self.num_train_batches)
+            self.scheduler = torch.optim.lr_scheduler.ConstantLR(self.optimizer, factor= config.TRAIN.LR)
+            # self.scheduler = torch.optim.lr_scheduler.OneCycleLR(
+            #     self.optimizer, max_lr=config.TRAIN.LR, epochs=config.TRAIN.EPOCHS, steps_per_epoch=self.num_train_batches)
         elif config.TOOLBOX_MODE == "only_test":
             pass
         else:
@@ -69,7 +80,10 @@ class PhysnetTrainer(BaseTrainer):
                 rPPG = (rPPG - torch.mean(rPPG)) / torch.std(rPPG)  # normalize
                 BVP_label = (BVP_label - torch.mean(BVP_label)) / \
                             torch.std(BVP_label)  # normalize
-                loss = self.loss_model(rPPG, BVP_label)
+                if type(self.loss_model_train) == TALOSLoss:
+                    loss = self.loss_model_train(rPPG, BVP_label, batch[2])
+                else:
+                    loss = self.loss_model_train(rPPG, BVP_label)
                 loss.backward()
                 running_loss += loss.item()
                 if idx % 100 == 99:  # print every 100 mini-batches
@@ -129,7 +143,10 @@ class PhysnetTrainer(BaseTrainer):
                 rPPG = (rPPG - torch.mean(rPPG)) / torch.std(rPPG)  # normalize
                 BVP_label = (BVP_label - torch.mean(BVP_label)) / \
                             torch.std(BVP_label)  # normalize
-                loss_ecg = self.loss_model(rPPG, BVP_label)
+                if type(self.loss_model_val) == TALOSLoss:
+                    loss_ecg = self.loss_model_val(rPPG, BVP_label, valid_batch[2], validation=True)
+                else:
+                    loss_ecg = self.loss_model_val(rPPG, BVP_label)
                 valid_loss.append(loss_ecg.item())
                 valid_step += 1
                 vbar.set_postfix(loss=loss_ecg.item())

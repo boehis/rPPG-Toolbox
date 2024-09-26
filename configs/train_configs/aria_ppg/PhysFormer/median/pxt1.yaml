@@ -1,0 +1,101 @@
+BASE: ['']
+TOOLBOX_MODE: "train_and_test"      # "train_and_test"  or "only_test"
+TRAIN:
+  BATCH_SIZE: 4
+  EPOCHS: 30
+  LR: 9e-4
+  MODEL_FILE_NAME: AriaPPG_AriaPPG_physformer
+  PLOT_LOSSES_AND_LR: True
+  DATA:
+    FILTERING:
+      SELECT_TASKS: True
+      TASK_LIST: 
+        - T1
+    FS: 30
+    DATASET: AriaPPG
+    DO_PREPROCESS: False               # if first time, should be true
+    DATA_FORMAT: NCDHW
+    DATA_PATH: "/cluster/scratch/boehis/preprocessed/median/len160/raw"                     # Raw dataset path, need to be updated
+    CACHED_PATH: "/cluster/scratch/boehis/preprocessed/median/len160/prep"
+    EXP_DATA_NAME: ""
+    BEGIN: 0.0
+    END: 0.65
+    PREPROCESS:
+      DATA_TYPE: ['Raw']         #if use physnet, should be Raw
+      LABEL_TYPE: Raw
+      DO_CHUNK: True
+      CHUNK_LENGTH: 160
+      CROP_FACE:
+        DO_CROP_FACE: False
+      RESIZE:
+        H: 128
+        W: 128
+VALID:
+  DATA:
+    FILTERING:
+      SELECT_TASKS: True
+      TASK_LIST: 
+        - T1
+    FS: 30
+    DATASET: AriaPPG
+    DO_PREPROCESS: False               # if first time, should be true
+    DATA_FORMAT: NCDHW
+    DATA_PATH: "/cluster/scratch/boehis/preprocessed/median/len160/raw"                     # Raw dataset path, need to be updated
+    CACHED_PATH: "/cluster/scratch/boehis/preprocessed/median/len160/prep"
+    EXP_DATA_NAME: ""
+    BEGIN: 0.65
+    END: 0.85
+    PREPROCESS:
+      DATA_TYPE: ['Raw']         #if use physnet, should be Raw
+      LABEL_TYPE: Raw
+      DO_CHUNK: True
+      CHUNK_LENGTH: 160
+      CROP_FACE:
+        DO_CROP_FACE: False
+      RESIZE:
+        H: 128
+        W: 128
+TEST:
+  METRICS: ['MAE']
+  USE_LAST_EPOCH: False                      # to use provided validation dataset to find the best epoch, should be false
+  DATA:
+    FS: 30
+    DATASET: AriaPPG
+    DO_PREPROCESS: False               # if first time, should be true
+    DATA_FORMAT: NCDHW
+    DATA_PATH: "/cluster/scratch/boehis/preprocessed/median/len160/raw"                     # Raw dataset path, need to be updated
+    CACHED_PATH: "/cluster/scratch/boehis/preprocessed/median/len160/prep"
+    EXP_DATA_NAME: ""
+    BEGIN: 0.85
+    END: 1.0
+    PREPROCESS:
+      DATA_TYPE: ['Raw']         #if use physnet, should be Raw
+      LABEL_TYPE: Raw
+      DO_CHUNK: True
+      CHUNK_LENGTH: 160
+      CROP_FACE:
+        DO_CROP_FACE: False
+      RESIZE:
+        H: 128
+        W: 128
+DEVICE: cuda:0
+NUM_OF_GPU_TRAIN: 1
+LOG:
+  PATH: runs/train_configs/PhysFormer/median/pxt1
+MODEL:
+  DROP_RATE: 0.1
+  NAME: PhysFormer
+  PHYSFORMER:                     # Probably need to update these in some meaningful way
+    PATCH_SIZE: 4
+    DIM: 96
+    FF_DIM: 144
+    NUM_HEADS: 4
+    NUM_LAYERS: 12
+    THETA: 0.7
+INFERENCE:
+  BATCH_SIZE: 4
+  EVALUATION_METHOD: ["peak detection", "FFT"]        # "FFT" or "peak detection"
+  EVALUATION_WINDOW:
+    USE_SMALLER_WINDOW: False        # Change this if you'd like an evaluation window smaller than the test video length
+    WINDOW_SIZE: 10        # In seconds
+  MODEL_PATH: ""

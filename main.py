@@ -13,6 +13,7 @@ from dataset import data_loader
 from neural_methods import trainer
 from unsupervised_methods.unsupervised_predictor import unsupervised_predict
 from torch.utils.data import DataLoader
+from collections import deque
 
 RANDOM_SEED = 100
 torch.manual_seed(RANDOM_SEED)
@@ -105,33 +106,40 @@ def test(config, data_loader_dict):
         raise ValueError('Your Model is Not Supported  Yet!')
     model_trainer.test(data_loader_dict)
 
+def loso_cv(config, data_loader_ditcs_loso_cv):
+    config.defrost()
+    config.TOOLBOX_MODE = "train_and_test"
+    log_path = config.LOG.PATH
+    model_dir = config.MODEL.MODEL_DIR
+    output_save_dir = config.TEST.OUTPUT_SAVE_DIR
+    for i, data_loader_dict in enumerate(data_loader_ditcs_loso_cv):
+        print(f"Train and test fold nr. {i}/{len(data_loader_ditcs_loso_cv)}")
+        config.LOG.PATH = os.path.join(log_path, f'fold_{i}')
+        config.MODEL.MODEL_DIR = model_dir.replace(log_path, config.LOG.PATH)
+        config.TEST.OUTPUT_SAVE_DIR = output_save_dir.replace(log_path, config.LOG.PATH)
+        train_and_test(config, data_loader_dict)
+    config.freeze()
 
 def unsupervised_method_inference(config, data_loader):
     if not config.UNSUPERVISED.METHOD:
         raise ValueError("Please set unsupervised method in yaml!")
-    all_results = []
     for unsupervised_method in config.UNSUPERVISED.METHOD:
         if unsupervised_method == "POS":
-            results = unsupervised_predict(config, data_loader, "POS")
+            unsupervised_predict(config, data_loader, "POS")
         elif unsupervised_method == "CHROM":
-            results = unsupervised_predict(config, data_loader, "CHROM")
+            unsupervised_predict(config, data_loader, "CHROM")
         elif unsupervised_method == "ICA":
-            results = unsupervised_predict(config, data_loader, "ICA")
+            unsupervised_predict(config, data_loader, "ICA")
         elif unsupervised_method == "GREEN":
-            results = unsupervised_predict(config, data_loader, "GREEN")
+            unsupervised_predict(config, data_loader, "GREEN")
         elif unsupervised_method == "LGI":
-            results = unsupervised_predict(config, data_loader, "LGI")
+            unsupervised_predict(config, data_loader, "LGI")
         elif unsupervised_method == "PBV":
-            results = unsupervised_predict(config, data_loader, "PBV")
+            unsupervised_predict(config, data_loader, "PBV")
         elif unsupervised_method == "OMIT":
-            results = unsupervised_predict(config, data_loader, "OMIT")
+            unsupervised_predict(config, data_loader, "OMIT")
         else:
             raise ValueError("Not supported unsupervised method!")
-
-        all_results.extend(results)
-    all_results = pd.DataFrame(all_results)
-    os.makedirs(config.UNSUPERVISED.OUTPUT_SAVE_DIR, exist_ok=True)
-    all_results.to_csv(os.path.join(config.UNSUPERVISED.OUTPUT_SAVE_DIR,"all_results.csv"))
 
 if __name__ == "__main__":
     # parse arguments.
@@ -147,6 +155,7 @@ if __name__ == "__main__":
     print(config, end='\n\n')
 
     data_loader_dict = dict() # dictionary of data loaders 
+    data_loader_ditcs_loso_cv = []
     if config.TOOLBOX_MODE == "train_and_test":
         # train_loader
         if config.TRAIN.DATA.DATASET == "UBFC-rPPG":
@@ -278,6 +287,110 @@ if __name__ == "__main__":
         else:
             data_loader_dict['test'] = None
 
+    elif config.TOOLBOX_MODE == "loso_cv":
+        if config.TRAIN.DATA.DATASET == "UBFC-rPPG":
+            loader = data_loader.UBFCrPPGLoader.UBFCrPPGLoader
+        elif config.TRAIN.DATA.DATASET == "PURE":
+            loader = data_loader.PURELoader.PURELoader
+        elif config.TRAIN.DATA.DATASET == "SCAMPS":
+            loader = data_loader.SCAMPSLoader.SCAMPSLoader
+        elif config.TRAIN.DATA.DATASET == "MMPD":
+            loader = data_loader.MMPDLoader.MMPDLoader
+        elif config.TRAIN.DATA.DATASET == "BP4DPlus":
+            loader = data_loader.BP4DPlusLoader.BP4DPlusLoader
+        elif config.TRAIN.DATA.DATASET == "BP4DPlusBigSmall":
+            loader = data_loader.BP4DPlusBigSmallLoader.BP4DPlusBigSmallLoader
+        elif config.TRAIN.DATA.DATASET == "UBFC-PHYS":
+            loader = data_loader.UBFCPHYSLoader.UBFCPHYSLoader
+        elif config.TRAIN.DATA.DATASET == "iBVP":
+            loader = data_loader.iBVPLoader.iBVPLoader
+        elif config.TRAIN.DATA.DATASET == "AriaPPG":
+            loader = data_loader.AriaPPGLoader.AriaPPGLoader
+        else:
+            raise ValueError("Unsupported dataset! Currently supporting UBFC-rPPG, PURE, MMPD, \
+                             SCAMPS, BP4D+ (Normal and BigSmall preprocessing), UBFC-PHYS, iBVP and AriaPPG.")
+
+        assert len(config.TRAIN.DATA.LOSO_SUBJECTS) > 0, "Number of LOSO subjects must be > 0"
+
+        loso_subjects_deque = deque(config.TRAIN.DATA.LOSO_SUBJECTS)
+        num_subjects = len(config.TRAIN.DATA.LOSO_SUBJECTS)
+
+        # train_start=int(config.TRAIN.DATA.BEGIN  * (num_subjects-1))
+        # train_end=int(config.TRAIN.DATA.END      * (num_subjects-1))
+        # val_start=int(config.VALID.DATA.BEGIN    * (num_subjects-1))
+        # val_end=int(config.VALID.DATA.END        * (num_subjects-1))
+
+
+        train_start=int(    0.0 * (num_subjects-1))
+        train_end=int(  0.8 * (num_subjects-1))
+        val_start=int(  0.8 * (num_subjects-1))
+        val_end=int(    1.0 * (num_subjects-1))
+
+        config.defrost()
+
+        for fold in range(num_subjects):
+            data_loader_dict = dict()
+            loso_subjects_deque.rotate(1)
+            rotated_subjects = list(loso_subjects_deque)
+            
+            config.TRAIN.DATA.FILTERING.LOSO_CV = True
+
+            train_data_conf = config.TRAIN.DATA.clone()
+            train_data_conf.FILTERING.SUBJECT_LIST = rotated_subjects[train_start:train_end]
+            print("train_data_conf:", train_data_conf.FILTERING.SUBJECT_LIST)
+            train_data_loader = loader(
+                name="train",
+                data_path=train_data_conf.DATA_PATH,
+                config_data=train_data_conf)
+            data_loader_dict['train'] = DataLoader(
+                dataset=train_data_loader,
+                num_workers=16,
+                batch_size=config.TRAIN.BATCH_SIZE,
+                shuffle=True,
+                worker_init_fn=seed_worker,
+                generator=train_generator
+            )
+
+            config.TRAIN.DATA.DO_PREPROCESS = False
+
+            if not config.TEST.USE_LAST_EPOCH:
+                valid_data_conf = config.TRAIN.DATA.clone()
+                valid_data_conf.FILTERING.SUBJECT_LIST = rotated_subjects[val_start:val_end]
+                print("valid_data_conf:", valid_data_conf.FILTERING.SUBJECT_LIST)   
+                valid_data = loader(
+                    name="valid",
+                    data_path=valid_data_conf.DATA_PATH,
+                    config_data=valid_data_conf)
+                data_loader_dict["valid"] = DataLoader(
+                    dataset=valid_data,
+                    num_workers=16,
+                    batch_size=config.TRAIN.BATCH_SIZE,  # batch size for val is the same as train
+                    shuffle=False,
+                    worker_init_fn=seed_worker,
+                    generator=general_generator
+                )
+            else:
+                print("Testing uses last epoch, validation dataset is not required.", end='\n\n')
+            
+            test_data_conf = config.TRAIN.DATA.clone()
+            test_data_conf.FILTERING.SUBJECT_LIST = [rotated_subjects[-1]]
+            print("test_data_conf:", test_data_conf.FILTERING.SUBJECT_LIST)   
+            test_data = loader(
+                name="test",
+                data_path=test_data_conf.DATA_PATH,
+                config_data=test_data_conf)
+            data_loader_dict["test"] = DataLoader(
+                dataset=test_data,
+                num_workers=16,
+                batch_size=config.INFERENCE.BATCH_SIZE,
+                shuffle=False,
+                worker_init_fn=seed_worker,
+                generator=general_generator
+            )
+
+            data_loader_ditcs_loso_cv.append(data_loader_dict)
+        config.freeze()
+
     elif config.TOOLBOX_MODE == "unsupervised_method":
         # unsupervised method dataloader
         if config.UNSUPERVISED.DATA.DATASET == "UBFC-rPPG":
@@ -320,6 +433,8 @@ if __name__ == "__main__":
         train_and_test(config, data_loader_dict)
     elif config.TOOLBOX_MODE == "only_test":
         test(config, data_loader_dict)
+    elif config.TOOLBOX_MODE == "loso_cv":
+        loso_cv(config, data_loader_ditcs_loso_cv)
     elif config.TOOLBOX_MODE == "unsupervised_method":
         unsupervised_method_inference(config, data_loader_dict)
     else:

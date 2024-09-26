@@ -1,3 +1,4 @@
+import os
 import numpy as np
 import pandas as pd
 import torch
@@ -48,13 +49,15 @@ def calculate_metrics(predictions, labels, config):
     gt_hr_fft_all = list()
     predict_hr_peak_all = list()
     gt_hr_peak_all = list()
-    SNR_all = list()
-    MACC_all = list()
+    SNR_peak_all = list()
+    SNR_fft_all = list()
+    MACC_peak_all = list()
+    MACC_fft_all = list()
+    results = []
     print("Calculating metrics!")
     for index in tqdm(predictions.keys(), ncols=80):
         prediction = _reform_data_from_dict(predictions[index])
         label = _reform_data_from_dict(labels[index])
-
         video_frame_size = prediction.shape[0]
         if config.INFERENCE.EVALUATION_WINDOW.USE_SMALLER_WINDOW:
             window_frame_size = config.INFERENCE.EVALUATION_WINDOW.WINDOW_SIZE * config.TEST.DATA.FS
@@ -79,23 +82,21 @@ def calculate_metrics(predictions, labels, config):
             else:
                 raise ValueError("Unsupported label type in testing!")
             
-            if config.INFERENCE.EVALUATION_METHOD == "peak detection":
+            if "peak detection" in config.INFERENCE.EVALUATION_METHOD:
                 gt_hr_peak, pred_hr_peak, SNR, macc = calculate_metric_per_video(
                     pred_window, label_window, diff_flag=diff_flag_test, fs=config.TEST.DATA.FS, hr_method='Peak')
                 gt_hr_peak_all.append(gt_hr_peak)
                 predict_hr_peak_all.append(pred_hr_peak)
-                SNR_all.append(SNR)
-                MACC_all.append(macc)
-            elif config.INFERENCE.EVALUATION_METHOD == "FFT":
+                SNR_peak_all.append(SNR)
+                MACC_peak_all.append(macc)
+            if "FFT" in config.INFERENCE.EVALUATION_METHOD:
                 gt_hr_fft, pred_hr_fft, SNR, macc = calculate_metric_per_video(
                     pred_window, label_window, diff_flag=diff_flag_test, fs=config.TEST.DATA.FS, hr_method='FFT')
                 gt_hr_fft_all.append(gt_hr_fft)
                 predict_hr_fft_all.append(pred_hr_fft)
-                SNR_all.append(SNR)
-                MACC_all.append(macc)
-            else:
-                raise ValueError("Inference evaluation method name wrong!")
-    
+                SNR_fft_all.append(SNR)
+                MACC_fft_all.append(macc)
+
     # Filename ID to be used in any results files (e.g., Bland-Altman plots) that get saved
     if config.TOOLBOX_MODE == 'train_and_test':
         filename_id = config.TRAIN.MODEL_FILE_NAME
@@ -105,11 +106,11 @@ def calculate_metrics(predictions, labels, config):
     else:
         raise ValueError('Metrics.py evaluation only supports train_and_test and only_test!')
 
-    if config.INFERENCE.EVALUATION_METHOD == "FFT":
+    if "FFT" in config.INFERENCE.EVALUATION_METHOD:
         gt_hr_fft_all = np.array(gt_hr_fft_all)
         predict_hr_fft_all = np.array(predict_hr_fft_all)
-        SNR_all = np.array(SNR_all)
-        MACC_all = np.array(MACC_all)
+        SNR_all = np.array(SNR_fft_all)
+        MACC_all = np.array(MACC_fft_all)
         num_test_samples = len(predict_hr_fft_all)
         for metric in config.TEST.METRICS:
             if metric == "MAE":
@@ -155,11 +156,11 @@ def calculate_metrics(predictions, labels, config):
                     file_name=f'{filename_id}_FFT_BlandAltman_DifferencePlot.pdf')
             else:
                 raise ValueError("Wrong Test Metric Type")
-    elif config.INFERENCE.EVALUATION_METHOD == "peak detection":
+    if "peak detection" in config.INFERENCE.EVALUATION_METHOD:
         gt_hr_peak_all = np.array(gt_hr_peak_all)
         predict_hr_peak_all = np.array(predict_hr_peak_all)
-        SNR_all = np.array(SNR_all)
-        MACC_all = np.array(MACC_all)
+        SNR_all = np.array(SNR_peak_all)
+        MACC_all = np.array(MACC_peak_all)
         num_test_samples = len(predict_hr_peak_all)
         for metric in config.TEST.METRICS:
             if metric == "MAE":
@@ -205,5 +206,4 @@ def calculate_metrics(predictions, labels, config):
                     file_name=f'{filename_id}_Peak_BlandAltman_DifferencePlot.pdf')
             else:
                 raise ValueError("Wrong Test Metric Type")
-    else:
-        raise ValueError("Inference evaluation method name wrong!")
+

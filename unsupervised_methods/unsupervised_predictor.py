@@ -11,6 +11,7 @@ from unsupervised_methods.methods.OMIT import *
 from tqdm import tqdm
 from evaluation.BlandAltmanPy import BlandAltman
 import re
+import os
 import pandas as pd
 
 def unsupervised_predict(config, data_loader, method_name):
@@ -22,12 +23,16 @@ def unsupervised_predict(config, data_loader, method_name):
     gt_hr_peak_all = []
     predict_hr_fft_all = []
     gt_hr_fft_all = []
-    SNR_all = []
-    MACC_all = []
+    SNR_peak_all = []
+    SNR_fft_all = []
+    MACC_peak_all = []
+    MACC_fft_all = []
     results = []
     sbar = tqdm(data_loader["unsupervised"], ncols=80)
     for _, test_batch in enumerate(sbar):
         batch_size = test_batch[0].shape[0]
+        prediction = []
+        label = []
         for idx in range(batch_size):
             data_input, labels_input = test_batch[0][idx].cpu().numpy(), test_batch[1][idx].cpu().numpy()
             if method_name == "POS":
@@ -47,6 +52,9 @@ def unsupervised_predict(config, data_loader, method_name):
             else:
                 raise ValueError("unsupervised method name wrong!")
 
+            prediction.extend(BVP)
+            label.extend(labels_input)
+
             video_frame_size = test_batch[0].shape[1]
             if config.INFERENCE.EVALUATION_WINDOW.USE_SMALLER_WINDOW:
                 window_frame_size = config.INFERENCE.EVALUATION_WINDOW.WINDOW_SIZE * config.UNSUPERVISED.DATA.FS
@@ -63,50 +71,33 @@ def unsupervised_predict(config, data_loader, method_name):
                     print(f"Window frame size of {len(BVP_window)} is smaller than minimum pad length of 9. Window ignored!")
                     continue
 
-                if config.INFERENCE.EVALUATION_METHOD == "peak detection":
+                if "peak detection" in config.INFERENCE.EVALUATION_METHOD:
                     gt_hr, pre_hr, SNR, macc = calculate_metric_per_video(BVP_window, label_window, diff_flag=False,
                                                                     fs=config.UNSUPERVISED.DATA.FS, hr_method='Peak')
                     gt_hr_peak_all.append(gt_hr)
                     predict_hr_peak_all.append(pre_hr)
-                    SNR_all.append(SNR)
-                    MACC_all.append(macc)
-
-                    results.append({
-                        "CAM": "head" if "head" in test_batch[2][0] else "stat",
-                        "PID": re.search(r"P\d{3}", test_batch[2][0]).group(0),
-                        "TID": re.search(r"T\d", test_batch[2][0]).group(0),
-                        "slice": int(test_batch[3][0]),
-                        "batch_idx": idx,
-                        "eval_window": i,
-                        "method_name": method_name,
-                        "gt_hr": gt_hr,
-                        "pre_hr": pre_hr,
-                        "SNR": SNR,
-                        "macc": macc,
-                    })
-                elif config.INFERENCE.EVALUATION_METHOD == "FFT":
+                    SNR_peak_all.append(SNR)
+                    MACC_peak_all.append(macc)
+                if "FFT" in config.INFERENCE.EVALUATION_METHOD:
                     gt_fft_hr, pre_fft_hr, SNR, macc = calculate_metric_per_video(BVP_window, label_window, diff_flag=False,
                                                                     fs=config.UNSUPERVISED.DATA.FS, hr_method='FFT')
                     gt_hr_fft_all.append(gt_fft_hr)
                     predict_hr_fft_all.append(pre_fft_hr)
-                    SNR_all.append(SNR)
-                    MACC_all.append(macc)
-                    
-                    results.append({
-                        "CAM": "head" if "head" in test_batch[2][0] else "stat",
-                        "PID": re.search(r"P\d{3}", test_batch[2][0]).group(0),
-                        "TID": re.search(r"T\d", test_batch[2][0]).group(0),
-                        "slice": int(test_batch[3][0]),
-                        "batch_idx": idx,
-                        "eval_window": i,
-                        "method_name": method_name,
-                        "gt_fft_hr": gt_fft_hr,
-                        "pre_fft_hr": pre_fft_hr,
-                        "SNR": SNR,
-                        "macc": macc,
-                    })
-                else:
-                    raise ValueError("Inference evaluation method name wrong!")
+                    SNR_fft_all.append(SNR)
+                    MACC_fft_all.append(macc)
+
+        results.append({
+            "index": test_batch[2][0],
+            "slice": int(test_batch[3][0]),
+            "prediction": prediction,
+            "label": label
+        })
+
+    results = pd.DataFrame(results)
+    path_name = os.path.join(config.UNSUPERVISED.OUTPUT_SAVE_DIR)
+    os.makedirs(path_name, exist_ok=True)
+    results.to_csv(os.path.join(path_name,f"{method_name}_all_results.csv"))
+
     print("Used Unsupervised Method: " + method_name)
 
     # Filename ID to be used in any results files (e.g., Bland-Altman plots) that get saved
@@ -115,11 +106,11 @@ def unsupervised_predict(config, data_loader, method_name):
     else:
         raise ValueError('unsupervised_predictor.py evaluation only supports unsupervised_method!')
 
-    if config.INFERENCE.EVALUATION_METHOD == "peak detection":
+    if "peak detection" in config.INFERENCE.EVALUATION_METHOD:
         predict_hr_peak_all = np.array(predict_hr_peak_all)
         gt_hr_peak_all = np.array(gt_hr_peak_all)
-        SNR_all = np.array(SNR_all)
-        MACC_all = np.array(MACC_all)
+        SNR_all = np.array(SNR_peak_all)
+        MACC_all = np.array(MACC_peak_all)
         num_test_samples = len(predict_hr_peak_all)
         for metric in config.UNSUPERVISED.METRICS:
             if metric == "MAE":
@@ -163,11 +154,11 @@ def unsupervised_predict(config, data_loader, method_name):
                     file_name=f'{filename_id}_Peak_BlandAltman_DifferencePlot.pdf')
             else:
                 raise ValueError("Wrong Test Metric Type")
-    elif config.INFERENCE.EVALUATION_METHOD == "FFT":
+    if "FFT" in config.INFERENCE.EVALUATION_METHOD:
         predict_hr_fft_all = np.array(predict_hr_fft_all)
         gt_hr_fft_all = np.array(gt_hr_fft_all)
-        SNR_all = np.array(SNR_all)
-        MACC_all = np.array(MACC_all)
+        SNR_all = np.array(SNR_peak_all)
+        MACC_all = np.array(MACC_peak_all)
         num_test_samples = len(predict_hr_fft_all)
         for metric in config.UNSUPERVISED.METRICS:
             if metric == "MAE":
@@ -211,7 +202,4 @@ def unsupervised_predict(config, data_loader, method_name):
                     file_name=f'{filename_id}_FFT_BlandAltman_DifferencePlot.pdf')
             else:
                 raise ValueError("Wrong Test Metric Type")
-    else:
-        raise ValueError("Inference evaluation method name wrong!")
-
-    return results
+    

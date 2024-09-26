@@ -53,6 +53,13 @@ class PhysFormerTrainer(BaseTrainer):
                 patches=(self.patch_size,) * 3, dim=self.dim, ff_dim=self.ff_dim, num_heads=self.num_heads, num_layers=self.num_layers, 
                 dropout_rate=self.dropout_rate, theta=self.theta).to(self.device)
             self.model = torch.nn.DataParallel(self.model, device_ids=list(range(config.NUM_OF_GPU_TRAIN)))
+            if config.MODEL.RESUME != '':
+                if not os.path.exists(config.MODEL.RESUME):
+                    raise ValueError("Pretrained model path error! Please check MODEL.RESUME in your yaml.")
+                self.model.load_state_dict(torch.load(config.MODEL.RESUME))
+                print("Finetuning uses pretrained model!")
+                print(config.MODEL.RESUME)
+
 
             self.num_train_batches = len(data_loader["train"])
             self.criterion_reg = torch.nn.MSELoss()

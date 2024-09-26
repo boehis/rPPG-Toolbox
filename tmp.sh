@@ -1,0 +1,32 @@
+sbatch --output=./configs/train_configs/aria_ppg/DeepPhys/median/pxt1.out  --open-mode=truncate --wrap="python ./main.py --config ./configs/train_configs/aria_ppg/DeepPhys/median/pxt1.yaml" --nodes=1 --cpus-per-task=2 --mem-per-cpu=10G --gpus=1 --time=200
+sbatch --output=./configs/train_configs/aria_ppg/DeepPhys/median/pxt1stat.out  --open-mode=truncate --wrap="python ./main.py --config ./configs/train_configs/aria_ppg/DeepPhys/median/pxt1stat.yaml" --nodes=1 --cpus-per-task=2 --mem-per-cpu=10G --gpus=1 --time=200
+sbatch --output=./configs/train_configs/aria_ppg/DeepPhys/median/pxtx.out  --open-mode=truncate --wrap="python ./main.py --config ./configs/train_configs/aria_ppg/DeepPhys/median/pxtx.yaml" --nodes=1 --cpus-per-task=2 --mem-per-cpu=10G --gpus=1 --time=200
+
+sbatch --output=./configs/train_configs/aria_ppg/PhysNet/median/pxt1.out  --open-mode=truncate --wrap="python ./main.py --config ./configs/train_configs/aria_ppg/PhysNet/median/pxt1.yaml" --nodes=1 --cpus-per-task=2 --mem-per-cpu=10G --gpus=1 --time=200
+sbatch --output=./configs/train_configs/aria_ppg/PhysNet/median/pxt1_diffnormalised.out  --open-mode=truncate --wrap="python ./main.py --config ./configs/train_configs/aria_ppg/PhysNet/median/pxt1_diffnormalised.yaml" --nodes=1 --cpus-per-task=2 --mem-per-cpu=10G --gpus=1 --time=200
+sbatch --output=./configs/train_configs/aria_ppg/PhysNet/median/pxt1stat.out  --open-mode=truncate --wrap="python ./main.py --config ./configs/train_configs/aria_ppg/PhysNet/median/pxt1stat.yaml" --nodes=1 --cpus-per-task=2 --mem-per-cpu=10G --gpus=1 --time=200
+sbatch --output=./configs/train_configs/aria_ppg/PhysNet/median/pxt1stat_diffnormalised.out  --open-mode=truncate --wrap="python ./main.py --config ./configs/train_configs/aria_ppg/PhysNet/median/pxt1stat_diffnormalised.yaml" --nodes=1 --cpus-per-task=2 --mem-per-cpu=10G --gpus=1 --time=200
+sbatch --output=./configs/train_configs/aria_ppg/PhysNet/median/pxtx_diffnormalised.out  --open-mode=truncate --wrap="python ./main.py --config ./configs/train_configs/aria_ppg/PhysNet/median/pxtx_diffnormalised.yaml" --nodes=1 --cpus-per-task=2 --mem-per-cpu=10G --gpus=1 --time=300
+sbatch --output=./configs/train_configs/aria_ppg/PhysNet/median/pxtx.out  --open-mode=truncate --wrap="python ./main.py --config ./configs/train_configs/aria_ppg/PhysNet/median/pxtx.yaml" --nodes=1 --cpus-per-task=2 --mem-per-cpu=10G --gpus=1 --time=300
+
+sbatch --output=./configs/train_configs/aria_ppg/Tscan/median/pxt1.out  --open-mode=truncate --wrap="python ./main.py --config ./configs/train_configs/aria_ppg/Tscan/median/pxt1.yaml" --nodes=1 --cpus-per-task=2 --mem-per-cpu=10G --gpus=1 --time=200
+sbatch --output=./configs/train_configs/aria_ppg/Tscan/median/pxt1stat.out  --open-mode=truncate --wrap="python ./main.py --config ./configs/train_configs/aria_ppg/Tscan/median/pxt1stat.yaml" --nodes=1 --cpus-per-task=2 --mem-per-cpu=10G --gpus=1 --time=200
+sbatch --output=./configs/train_configs/aria_ppg/Tscan/median/pxtx.out  --open-mode=truncate --wrap="python ./main.py --config ./configs/train_configs/aria_ppg/Tscan/median/pxtx.yaml" --nodes=1 --cpus-per-task=2 --mem-per-cpu=10G --gpus=1 --time=400
+
+sbatch --output=./configs/train_configs/aria_ppg/iBVPNet/median/pxt1.out  --open-mode=truncate --wrap="python ./main.py --config ./configs/train_configs/aria_ppg/iBVPNet/median/pxt1.yaml" --nodes=1 --cpus-per-task=2 --mem-per-cpu=10G --gpus=1 --time=200
+sbatch --output=./configs/train_configs/aria_ppg/iBVPNet/median/pxt1_diffnormalised.out  --open-mode=truncate --wrap="python ./main.py --config ./configs/train_configs/aria_ppg/iBVPNet/median/pxt1_diffnormalised.yaml" --nodes=1 --cpus-per-task=2 --mem-per-cpu=10G --gpus=1 --time=200
+sbatch --output=./configs/train_configs/aria_ppg/iBVPNet/median/pxt1stat.out  --open-mode=truncate --wrap="python ./main.py --config ./configs/train_configs/aria_ppg/iBVPNet/median/pxt1stat.yaml" --nodes=1 --cpus-per-task=2 --mem-per-cpu=10G --gpus=1 --time=200
+sbatch --output=./configs/train_configs/aria_ppg/iBVPNet/median/pxt1stat_diffnormalised.out  --open-mode=truncate --wrap="python ./main.py --config ./configs/train_configs/aria_ppg/iBVPNet/median/pxt1stat_diffnormalised.yaml" --nodes=1 --cpus-per-task=2 --mem-per-cpu=10G --gpus=1 --time=200
+sbatch --output=./configs/train_configs/aria_ppg/iBVPNet/median/pxtx.out  --open-mode=truncate --wrap="python ./main.py --config ./configs/train_configs/aria_ppg/iBVPNet/median/pxtx.yaml" --nodes=1 --cpus-per-task=2 --mem-per-cpu=10G --gpus=1 --time=200
+sbatch --output=./configs/train_configs/aria_ppg/iBVPNet/median/pxtx_diffnormalised.out  --open-mode=truncate --wrap="python ./main.py --config ./configs/train_configs/aria_ppg/iBVPNet/median/pxtx_diffnormalised.yaml" --nodes=1 --cpus-per-task=2 --mem-per-cpu=10G --gpus=1 --time=200
+
+sbatch --output=./configs/train_configs/aria_ppg/PhysFormer/median/pxtx.out  --open-mode=truncate --wrap="python ./main.py --config ./configs/train_configs/aria_ppg/PhysFormer/median/pxtx.yaml" --nodes=1 --cpus-per-task=2 --mem-per-cpu=10G --gpus=1 --time=400
+sbatch --output=./configs/train_configs/aria_ppg/PhysFormer/median/pxtx_diffnormalised.out  --open-mode=truncate --wrap="python ./main.py --config ./configs/train_configs/aria_ppg/PhysFormer/median/pxtx_diffnormalised.yaml" --nodes=1 --cpus-per-task=2 --mem-per-cpu=10G --gpus=1 --time=400
+sbatch --output=./configs/train_configs/aria_ppg/PhysFormer/median/pxt1stat.out  --open-mode=truncate --wrap="python ./main.py --config ./configs/train_configs/aria_ppg/PhysFormer/median/pxt1stat.yaml" --nodes=1 --cpus-per-task=2 --mem-per-cpu=10G --gpus=1 --time=400
+sbatch --output=./configs/train_configs/aria_ppg/PhysFormer/median/pxt1.out  --open-mode=truncate --wrap="python ./main.py --config ./configs/train_configs/aria_ppg/PhysFormer/median/pxt1.yaml" --nodes=1 --cpus-per-task=2 --mem-per-cpu=10G --gpus=1 --time=200
+sbatch --output=./configs/train_configs/aria_ppg/PhysFormer/median/pxt1_diffnormalised.out  --open-mode=truncate --wrap="python ./main.py --config ./configs/train_configs/aria_ppg/PhysFormer/median/pxt1_diffnormalised.yaml" --nodes=1 --cpus-per-task=2 --mem-per-cpu=10G --gpus=1 --time=200
+sbatch --output=./configs/train_configs/aria_ppg/PhysFormer/median/pxt1stat_diffnormalised.out  --open-mode=truncate --wrap="python ./main.py --config ./configs/train_configs/aria_ppg/PhysFormer/median/pxt1stat_diffnormalised.yaml" --nodes=1 --cpus-per-task=2 --mem-per-cpu=10G --gpus=1 --time=200
+
+
+
+

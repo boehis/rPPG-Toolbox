@@ -155,12 +155,24 @@ class AriaPPGLoader(BaseLoader):
         filtered_inputs = []
 
         for input in base_inputs:
+            print(input)
             input_name = input.split(os.sep)[-1].split('.')[0].rsplit('_', 1)[0]
+            subject = input_name[4:8]
+            input_idx = int(input.split(os.sep)[-1].split('.')[0].rsplit('_', 1)[1][5:])
             if self.filtering.USE_EXCLUSION_LIST and input_name in self.filtering.EXCLUSION_LIST :
                 # Skip loading the input as it's in the exclusion list
                 continue
             if self.filtering.SELECT_TASKS and not any(task in input_name for task in self.filtering.TASK_LIST):
                 # Skip loading the input as it's not in the task list
+                continue
+            if self.filtering.SELECT_INDICES and not input_idx in self.filtering.INDEX_LIST:
+                # Skip loading the input as it's not in the index list
+                continue
+            if self.filtering.SELECT_CAM and not input_name[:4] in self.filtering.CAM_LIST:
+                # Skip loading the input as it's not in the camera list
+                continue
+            if self.filtering.LOSO_CV and not(subject in self.filtering.SUBJECT_LIST):
+                # Skip subject if it's LOSO subject
                 continue
             filtered_inputs.append(input)
 
@@ -173,7 +185,7 @@ class AriaPPGLoader(BaseLoader):
         self.labels = labels
         self.preprocessed_data_len = len(filtered_inputs)
 
-        print(filtered_inputs)
+        # print(filtered_inputs)
 
     @staticmethod
     def read_video(video_file):

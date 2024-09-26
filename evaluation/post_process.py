@@ -8,6 +8,7 @@ import scipy.io
 from scipy.signal import butter
 from scipy.sparse import spdiags
 from copy import deepcopy
+import neurokit2 as nk
 
 def _next_power_of_2(x):
     """Calculate the nearest power of 2."""
@@ -32,7 +33,7 @@ def power2db(mag):
     """Convert power to db."""
     return 10 * np.log10(mag)
 
-def _calculate_fft_hr(ppg_signal, fs=60, low_pass=0.75, high_pass=2.5):
+def _calculate_fft_hr(ppg_signal, fs=60, low_pass=0.5, high_pass=2.5):
     """Calculate heart rate based on PPG using Fast Fourier transform (FFT)."""
     ppg_signal = np.expand_dims(ppg_signal, 0)
     N = _next_power_of_2(ppg_signal.shape[1])
@@ -45,8 +46,9 @@ def _calculate_fft_hr(ppg_signal, fs=60, low_pass=0.75, high_pass=2.5):
 
 def _calculate_peak_hr(ppg_signal, fs):
     """Calculate heart rate based on PPG using peak detection."""
-    ppg_peaks, _ = scipy.signal.find_peaks(ppg_signal)
-    hr_peak = 60 / (np.mean(np.diff(ppg_peaks)) / fs)
+    # ppg_peaks, _ = scipy.signal.find_peaks(ppg_signal) # nk method is supposed to be more reliable for PPG
+    ppg_peaks = nk.ppg_findpeaks(ppg_signal, sampling_rate=fs, method='elgendi', show=False)['PPG_Peaks']
+    hr_peak = 60 / (np.mean(np.diff(ppg_peaks)) / fs + 1e-6)
     return hr_peak
 
 def _compute_macc(pred_signal, gt_signal):
@@ -129,9 +131,9 @@ def calculate_metric_per_video(predictions, labels, fs=30, diff_flag=True, use_b
         predictions = _detrend(predictions, 100)
         labels = _detrend(labels, 100)
     if use_bandpass:
-        # bandpass filter between [0.75, 2.5] Hz
-        # equals [45, 150] beats per min
-        [b, a] = butter(1, [0.75 / fs * 2, 2.5 / fs * 2], btype='bandpass')
+        # bandpass filter between [0.5, 2.5] Hz
+        # equals [30, 150] beats per min
+        [b, a] = butter(1, [0.5 / fs * 2, 2.5 / fs * 2], btype='bandpass')
         predictions = scipy.signal.filtfilt(b, a, np.double(predictions))
         labels = scipy.signal.filtfilt(b, a, np.double(labels))
     
@@ -146,4 +148,9 @@ def calculate_metric_per_video(predictions, labels, fs=30, diff_flag=True, use_b
     else:
         raise ValueError('Please use FFT or Peak to calculate your HR.')
     SNR = _calculate_SNR(predictions, hr_label, fs=fs)
+
+    hr_label = hr_label if np.isfinite(hr_label) else 0.0
+    hr_pred = hr_pred if np.isfinite(hr_pred) else 0.0
+    SNR = SNR if np.isfinite(SNR) else 0.0
+    macc = macc if np.isfinite(macc) else 0.0
     return hr_label, hr_pred, SNR, macc
