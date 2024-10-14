@@ -80,6 +80,8 @@ def train_and_test(config, data_loader_dict):
         model_trainer = trainer.BigSmallTrainer.BigSmallTrainer(config, data_loader_dict)
     elif config.MODEL.NAME == 'PhysFormer':
         model_trainer = trainer.PhysFormerTrainer.PhysFormerTrainer(config, data_loader_dict)
+    elif config.MODEL.NAME == 'AriaNet':
+        model_trainer = trainer.AriaNetTrainer.AriaNetTrainer(config, data_loader_dict)
     else:
         raise ValueError('Your Model is Not Supported  Yet!')
     model_trainer.train(data_loader_dict)
@@ -113,6 +115,9 @@ def loso_cv(config, data_loader_ditcs_loso_cv):
     model_dir = config.MODEL.MODEL_DIR
     output_save_dir = config.TEST.OUTPUT_SAVE_DIR
     for i, data_loader_dict in enumerate(data_loader_ditcs_loso_cv):
+        if i in config.TRAIN.DATA.LOSO_SKIP_FOLDS:
+            print(f"Skipping fold nr. {i}/{len(data_loader_ditcs_loso_cv)}")
+            continue
         print(f"Train and test fold nr. {i}/{len(data_loader_ditcs_loso_cv)}")
         config.LOG.PATH = os.path.join(log_path, f'fold_{i}')
         config.MODEL.MODEL_DIR = model_dir.replace(log_path, config.LOG.PATH)

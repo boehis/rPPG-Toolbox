@@ -79,8 +79,8 @@ MODEL:
   NAME: Physnet
   PHYSNET:
     FRAME_NUM: 128
-    LOSS_TRAIN: 'pearson'
-    LOSS_VAL: 'pearson'
+    LOSS_TRAIN: 'physnet_pearson'
+    LOSS_VAL: 'physnet_pearson'
 INFERENCE:
   BATCH_SIZE: 4
   EVALUATION_METHOD: ["peak detection", "FFT"]        # "FFT" or "peak detection"

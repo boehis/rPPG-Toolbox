@@ -16,7 +16,7 @@ import math
 import torch
 import torch.optim as optim
 from evaluation.metrics import calculate_metrics
-from neural_methods.loss.PhysNetNegPearsonLoss import Neg_Pearson
+from neural_methods.loss.ShiftInvariantLosses import get_loss, TALOSLoss
 from neural_methods.loss.PhysFormerLossComputer import TorchLossComputer
 from neural_methods.model.PhysFormer import ViT_ST_ST_Compact3_TDC_gra_sharp
 from neural_methods.trainer.BaseTrainer import BaseTrainer
@@ -65,7 +65,7 @@ class PhysFormerTrainer(BaseTrainer):
             self.criterion_reg = torch.nn.MSELoss()
             self.criterion_L1loss = torch.nn.L1Loss()
             self.criterion_class = torch.nn.CrossEntropyLoss()
-            self.criterion_Pearson = Neg_Pearson()
+            self.criterion_Pearson = get_loss(config.MODEL.PHYSFORMER.LOSS)
             self.optimizer = optim.Adam(self.model.parameters(), lr=config.TRAIN.LR, weight_decay=0.00005)
             # TODO: In both the PhysFormer repo's training example and other implementations of a PhysFormer trainer, 
             # a step_size that doesn't end up changing the LR always seems to be used. This seems to defeat the point
@@ -116,7 +116,10 @@ class PhysFormerTrainer(BaseTrainer):
                 gra_sharp = 2.0
                 rPPG, _, _, _ = self.model(data, gra_sharp)
                 rPPG = (rPPG-torch.mean(rPPG, axis=-1).view(-1, 1))/torch.std(rPPG, axis=-1).view(-1, 1)    # normalize
-                loss_rPPG = self.criterion_Pearson(rPPG, label)
+                if type(self.criterion_Pearson) == TALOSLoss:
+                    loss_rPPG = self.criterion_Pearson(rPPG, label, batch[2])
+                else:
+                    loss_rPPG = self.criterion_Pearson(rPPG, label)
 
                 fre_loss = 0.0
                 kl_loss = 0.0

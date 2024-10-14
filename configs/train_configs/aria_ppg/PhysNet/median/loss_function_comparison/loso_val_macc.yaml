@@ -59,7 +59,7 @@ MODEL:
   NAME: Physnet
   PHYSNET:
     FRAME_NUM: 128
-    LOSS_TRAIN: 'pearson'
+    LOSS_TRAIN: 'physnet_pearson'
     LOSS_VAL: 'macc'
 INFERENCE:
   BATCH_SIZE: 4

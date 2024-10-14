@@ -21,19 +21,48 @@ def generate_folder_structure(dim=128, clip_length=128, data_type='Raw', is_unsu
 
 
 # Paths for supervised data
-SUPERVISED_ROOT_PATH = './/cluster/scratch/boehis/runs/train_configs/'
+SUPERVISED_ROOT_PATH = '/cluster/scratch/boehis/runs/train_configs/'
 SUPERVISED_PATHS = [
-    # os.path.join(SUPERVISED_ROOT_PATH, 'DeepPhys',    'median',  'loso_cv_finetune'),
-    # os.path.join(SUPERVISED_ROOT_PATH, 'DeepPhys',    'median',  'loso_cv_retrain'),
-    # os.path.join(SUPERVISED_ROOT_PATH, 'PhysFormer',  'median',  'loso_cv_finetune'),
-    # os.path.join(SUPERVISED_ROOT_PATH, 'PhysFormer',  'median',  'loso_cv_retrain'),
-    os.path.join(SUPERVISED_ROOT_PATH, 'PhysNet',     'median',  'loso_cv_finetune'),
-    # os.path.join(SUPERVISED_ROOT_PATH, 'PhysNet',     'median',  'loso_cv_retrain'),
-    # os.path.join(SUPERVISED_ROOT_PATH, 'Tscan',       'median',  'loso_cv_finetune'),
-    # os.path.join(SUPERVISED_ROOT_PATH, 'Tscan',       'median',  'loso_cv_retrain'),
-    # os.path.join(SUPERVISED_ROOT_PATH, 'iBVPNet',     'median',  'loso_cv_finetune'),
-    # os.path.join(SUPERVISED_ROOT_PATH, 'iBVPNet',     'median',  'loso_cv_retrain'),
+    # ('DeepPhys_finetune',   os.path.join(SUPERVISED_ROOT_PATH, 'DeepPhys',    'median',  'loso_cv_finetune')) ,
+    # ('DeepPhys_retrain',    os.path.join(SUPERVISED_ROOT_PATH, 'DeepPhys',    'median',  'loso_cv_retrain')) ,
+    # ('PhysFormer_finetune', os.path.join(SUPERVISED_ROOT_PATH, 'PhysFormer',  'median',  'loso_cv_finetune')) ,
+    # ('PhysFormer_retrain',  os.path.join(SUPERVISED_ROOT_PATH, 'PhysFormer',  'median',  'loso_cv_retrain')) ,
+    # ('PhysNet_finetune',    os.path.join(SUPERVISED_ROOT_PATH, 'PhysNet',     'median',  'loso_cv_finetune')) ,
+    # ('PhysNet_retrain',     os.path.join(SUPERVISED_ROOT_PATH, 'PhysNet',     'median',  'loso_cv_retrain')) ,
+    # ('Tscan_finetune',      os.path.join(SUPERVISED_ROOT_PATH, 'Tscan',       'median',  'loso_cv_finetune')) ,
+    # ('Tscan_retrain',       os.path.join(SUPERVISED_ROOT_PATH, 'Tscan',       'median',  'loso_cv_retrain')) ,
+    # ('iBVPNet_finetune',    os.path.join(SUPERVISED_ROOT_PATH, 'iBVPNet',     'median',  'loso_cv_finetune')) ,
+    # ('iBVPNet_retrain',     os.path.join(SUPERVISED_ROOT_PATH, 'iBVPNet',     'median',  'loso_cv_retrain')) ,
+
+    # ('PhysNet_loso_mcc',     os.path.join(SUPERVISED_ROOT_PATH, 'PhysNet',     'median',  'loss_function_comparison', 'loso_mcc')) ,        
+    # ('PhysNet_loso_soft_macc',     os.path.join(SUPERVISED_ROOT_PATH, 'PhysNet',     'median',  'loss_function_comparison', 'loso_soft_macc')) ,  
+    # ('PhysNet_loso_soft_msacc',     os.path.join(SUPERVISED_ROOT_PATH, 'PhysNet',     'median',  'loss_function_comparison', 'loso_soft_msacc')) , 
+    # ('PhysNet_loso_talos',     os.path.join(SUPERVISED_ROOT_PATH, 'PhysNet',     'median',  'loss_function_comparison', 'loso_talos')) ,      
+    # ('PhysNet_loso_val_macc',     os.path.join(SUPERVISED_ROOT_PATH, 'PhysNet',     'median',  'loss_function_comparison', 'loso_val_macc')) ,
+
+    # ('PhysFormer_loso_mcc',     os.path.join(SUPERVISED_ROOT_PATH, 'PhysFormer',     'median',  'loss_function_comparison', 'loso_mcc')) ,        
+    # ('PhysFormer_loso_soft_macc',     os.path.join(SUPERVISED_ROOT_PATH, 'PhysFormer',     'median',  'loss_function_comparison', 'loso_soft_macc')) ,  
+    # ('PhysFormer_loso_soft_msacc',     os.path.join(SUPERVISED_ROOT_PATH, 'PhysFormer',     'median',  'loss_function_comparison', 'loso_soft_msacc')) , 
+    # ('PhysFormer_loso_talos',     os.path.join(SUPERVISED_ROOT_PATH, 'PhysFormer',     'median',  'loss_function_comparison', 'loso_talos')) ,
+    
+    ('PhysNet_multim_adaptive_norm_10_imu',    os.path.join(SUPERVISED_ROOT_PATH, 'PhysNet',     'median',  'multimodal', 'adaptive_norm_10_imu')),
+    ('PhysNet_multim_adaptive_norm_2_imu',     os.path.join(SUPERVISED_ROOT_PATH, 'PhysNet',     'median',  'multimodal', 'adaptive_norm_2_imu')),
+    ('PhysNet_multim_adaptive_norm_4_imu',     os.path.join(SUPERVISED_ROOT_PATH, 'PhysNet',     'median',  'multimodal', 'adaptive_norm_4_imu')),
+    ('PhysNet_multim_adaptive_norm_8_imu',     os.path.join(SUPERVISED_ROOT_PATH, 'PhysNet',     'median',  'multimodal', 'adaptive_norm_8_imu')),
+    ('PhysNet_multim_add_10_imu',              os.path.join(SUPERVISED_ROOT_PATH, 'PhysNet',     'median',  'multimodal', 'add_10_imu')),
+    ('PhysNet_multim_add_2_imu',               os.path.join(SUPERVISED_ROOT_PATH, 'PhysNet',     'median',  'multimodal', 'add_2_imu')),
+    ('PhysNet_multim_add_4_imu',               os.path.join(SUPERVISED_ROOT_PATH, 'PhysNet',     'median',  'multimodal', 'add_4_imu')),
+    ('PhysNet_multim_add_8_imu',               os.path.join(SUPERVISED_ROOT_PATH, 'PhysNet',     'median',  'multimodal', 'add_8_imu')),
+    ('PhysNet_multim_cat_10_imu',              os.path.join(SUPERVISED_ROOT_PATH, 'PhysNet',     'median',  'multimodal', 'cat_10_imu')),
+    ('PhysNet_multim_cat_2_imu',               os.path.join(SUPERVISED_ROOT_PATH, 'PhysNet',     'median',  'multimodal', 'cat_2_imu')),
+    ('PhysNet_multim_cat_4_imu',               os.path.join(SUPERVISED_ROOT_PATH, 'PhysNet',     'median',  'multimodal', 'cat_4_imu')),
+    ('PhysNet_multim_cat_8_imu',               os.path.join(SUPERVISED_ROOT_PATH, 'PhysNet',     'median',  'multimodal', 'cat_8_imu')),
+    ('PhysNet_multim_cross_attention_10_imu',  os.path.join(SUPERVISED_ROOT_PATH, 'PhysNet',     'median',  'multimodal', 'cross_attention_10_imu')),
+    ('PhysNet_multim_cross_attention_2_imu',   os.path.join(SUPERVISED_ROOT_PATH, 'PhysNet',     'median',  'multimodal', 'cross_attention_2_imu')),
+    ('PhysNet_multim_cross_attention_4_imu',   os.path.join(SUPERVISED_ROOT_PATH, 'PhysNet',     'median',  'multimodal', 'cross_attention_4_imu')),
+    ('PhysNet_multim_cross_attention_8_imu',   os.path.join(SUPERVISED_ROOT_PATH, 'PhysNet',     'median',  'multimodal', 'cross_attention_8_imu')),
 ]
+
 
 # Reform function to reshape the data
 def reform_data(df_slice):
@@ -106,7 +135,6 @@ def load_data(path):
         labels = np.reshape(labels, (-1))
         reformed_data.append({
             "index": index,
-            "method": '_'.join(path.split(os.sep)[-3:]),
             "labels": labels,
             "predictions": predictions
         })
@@ -164,10 +192,11 @@ def process_and_save_data(data_frame, path, label_type):
 # Main function to process all paths
 def main():    
     # Process supervised paths
-    for path in SUPERVISED_PATHS:
+    for method, path in SUPERVISED_PATHS:
         if os.path.exists(path):
             print(f"Processing supervised path: {path}")
             data_frame, label_type = load_data(path)
+            data_frame['method'] = method
             process_and_save_data(data_frame, path, label_type)
         else:
             print(f"Path does not exist: {path}")

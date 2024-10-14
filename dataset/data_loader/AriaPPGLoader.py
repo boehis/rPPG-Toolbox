@@ -13,7 +13,7 @@ from dataset.data_loader.BaseLoader import BaseLoader
 from tqdm import tqdm
 import csv
 import pandas as pd
-
+from scipy.interpolate import interp1d
 import logging
 logging.basicConfig(level=logging.WARN, format='%(asctime)s - %(levelname)s - %(message)s')
 
@@ -50,7 +50,45 @@ class AriaPPGLoader(BaseLoader):
                 config_data(CfgNode): data settings(ref:config.py).
         """
         self.filtering = config_data.FILTERING
+        self.raw_imus = list()
+        self.quaternions = list()
         super().__init__(name, data_path, config_data)
+
+
+    def __getitem__(self, index):
+        """Returns a clip of video(3,T,W,H) and it's corresponding signals(T)."""
+        data = np.load(self.inputs[index])
+        label = np.load(self.labels[index])
+        raw_imu = np.load(self.raw_imus[index])
+        quaternion = np.load(self.quaternions[index])
+
+        if self.data_format == 'NDCHW':
+            data = np.transpose(data, (0, 3, 1, 2))
+        elif self.data_format == 'NCDHW':
+            data = np.transpose(data, (3, 0, 1, 2))
+        elif self.data_format == 'NDHWC':
+            pass
+        else:
+            raise ValueError('Unsupported Data Format!')
+        data = np.float32(data)
+        label = np.float32(label)
+        raw_imu = np.float32(raw_imu)
+        quaternion = np.float32(quaternion)
+        # item_path is the location of a specific clip in a preprocessing output folder
+        # For example, an item path could be /home/data/PURE_SizeW72_...unsupervised/501_input0.npy
+        item_path = self.inputs[index]
+        # item_path_filename is simply the filename of the specific clip
+        # For example, the preceding item_path's filename would be 501_input0.npy
+        item_path_filename = item_path.split(os.sep)[-1]
+        # split_idx represents the point in the previous filename where we want to split the string 
+        # in order to retrieve a more precise filename (e.g., 501) preceding the chunk (e.g., input0)
+        split_idx = item_path_filename.rindex('_')
+        # Following the previous comments, the filename for example would be 501
+        filename = item_path_filename[:split_idx]
+        # chunk_id is the extracted, numeric chunk identifier. Following the previous comments, 
+        # the chunk_id for example would be 0
+        chunk_id = item_path_filename[split_idx + 6:].split('.')[0]
+        return data, label, filename, chunk_id, raw_imu, quaternion
 
     def get_raw_data(self, data_path):
         """Returns data directories under the path(For AriaPPG dataset)."""
@@ -132,14 +170,70 @@ class AriaPPGLoader(BaseLoader):
 
         logging.debug("Read Labels with shape:", bvps.shape)
 
-        
+
+        # Read IMU
+        raw_imu = self.read_imu(
+            os.path.join(os.path.dirname(path),f"{cam_pos}_imu-left_{subject}_{task}_raw_imu.npy")
+        )
+        raw_imu = interp1d(
+            np.arange(raw_imu.shape[0]),
+            raw_imu, 
+            kind='linear', axis=0, fill_value="extrapolate")(np.linspace(0,raw_imu.shape[0]-1, frames.shape[0]))
+
+        quaternions = self.read_imu(
+            os.path.join(os.path.dirname(path),f"{cam_pos}_imu-left_{subject}_{task}_quaternions.npy")
+        )
+        quaternions = interp1d(
+            np.arange(quaternions.shape[0]),
+            quaternions, 
+            kind='linear', axis=0, fill_value="extrapolate")(np.linspace(0,quaternions.shape[0]-1, frames.shape[0]))
+
+        if config_preprocess.DO_CHUNK:  # chunk data into snippets
+            raw_imu_clips = [raw_imu[i * config_preprocess.CHUNK_LENGTH:(i + 1) * config_preprocess.CHUNK_LENGTH] for i in range(frames.shape[0] // config_preprocess.CHUNK_LENGTH)]
+            quaternions_clips = [quaternions[i * config_preprocess.CHUNK_LENGTH:(i + 1) * config_preprocess.CHUNK_LENGTH] for i in range(frames.shape[0] // config_preprocess.CHUNK_LENGTH)]
+        else:
+            raw_imu_clips = np.array([raw_imu])
+            quaternions_clips = np.array([quaternions])
+
         frames_clips, bvps_clips = self.preprocess(frames, bvps, config_preprocess)
 
         logging.debug("Preprocess frames_clips with shape:", frames_clips.shape)
         logging.debug("Preprocess frames_clips with dtype:", frames_clips.dtype)
 
-        input_name_list, label_name_list = self.save_multi_process(frames_clips, bvps_clips, index)
+        input_name_list, label_name_list = self.save_multi_process(frames_clips, bvps_clips, raw_imu_clips, quaternions_clips, index)
         file_list_dict[i] = input_name_list
+
+
+    def save_multi_process(self, frames_clips, bvps_clips, raw_imu_clips, quaternions_clips, filename):
+        """Save all the chunked data with multi-thread processing.
+
+        Args:
+            frames_clips(np.array): blood volumne pulse (PPG) labels.
+            bvps_clips(np.array): the length of each chunk.
+            filename: name the filename
+        Returns:
+            input_path_name_list: list of input path names
+            label_path_name_list: list of label path names
+        """
+        if not os.path.exists(self.cached_path):
+            os.makedirs(self.cached_path, exist_ok=True)
+        count = 0
+        input_path_name_list = []
+        label_path_name_list = []
+        for i in range(len(bvps_clips)):
+            assert (len(self.inputs) == len(self.labels))
+            input_path_name = self.cached_path + os.sep + "{0}_input{1}.npy".format(filename, str(count))
+            label_path_name = self.cached_path + os.sep + "{0}_label{1}.npy".format(filename, str(count))
+            raw_imu_path_name = self.cached_path + os.sep + "{0}_raw_imu{1}.npy".format(filename, str(count))
+            quaternions_path_name = self.cached_path + os.sep + "{0}_quaternions{1}.npy".format(filename, str(count))
+            input_path_name_list.append(input_path_name)
+            label_path_name_list.append(label_path_name)
+            np.save(input_path_name, frames_clips[i])
+            np.save(label_path_name, bvps_clips[i])
+            np.save(raw_imu_path_name, raw_imu_clips[i])
+            np.save(quaternions_path_name, quaternions_clips[i])
+            count += 1
+        return input_path_name_list, label_path_name_list
 
     def load_preprocessed_data(self):
         """ Loads the preprocessed data listed in the file list.
@@ -181,8 +275,13 @@ class AriaPPGLoader(BaseLoader):
         
         filtered_inputs = sorted(filtered_inputs)  # sort input file name list
         labels = [input_file.replace("input", "label") for input_file in filtered_inputs]
+        raw_imus = [input_file.replace("input", "raw_imu") for input_file in filtered_inputs]
+        quaternions = [input_file.replace("input", "quaternions") for input_file in filtered_inputs]
+
         self.inputs = filtered_inputs
         self.labels = labels
+        self.raw_imus = raw_imus
+        self.quaternions = quaternions
         self.preprocessed_data_len = len(filtered_inputs)
 
         # print(filtered_inputs)
@@ -196,3 +295,8 @@ class AriaPPGLoader(BaseLoader):
     def read_wave(bvp_file):
         """Reads a bvp signal file."""
         return np.load(bvp_file)
+
+    @staticmethod
+    def read_imu(imu_file):
+        """Reads a imu signal file."""
+        return np.load(imu_file)

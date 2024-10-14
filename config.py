@@ -43,6 +43,7 @@ _C.TRAIN.DATA.INFO.GLASSER = [True]
 _C.TRAIN.DATA.INFO.HAIR_COVER = [True]
 _C.TRAIN.DATA.INFO.MAKEUP = [True]
 _C.TRAIN.DATA.LOSO_SUBJECTS = []
+_C.TRAIN.DATA.LOSO_SKIP_FOLDS = []
 _C.TRAIN.DATA.FILTERING = CN()
 _C.TRAIN.DATA.FILTERING.USE_EXCLUSION_LIST = False
 _C.TRAIN.DATA.FILTERING.EXCLUSION_LIST = ['']
@@ -308,8 +309,18 @@ _C.MODEL.MODEL_DIR = 'PreTrainedModels'
 # Specific parameters for physnet parameters
 _C.MODEL.PHYSNET = CN()
 _C.MODEL.PHYSNET.FRAME_NUM = 64
-_C.MODEL.PHYSNET.LOSS_TRAIN = 'pearson'
-_C.MODEL.PHYSNET.LOSS_VAL = 'pearson'
+_C.MODEL.PHYSNET.LOSS_TRAIN = 'physnet_pearson'
+_C.MODEL.PHYSNET.LOSS_VAL = 'physnet_pearson'
+
+# Specific parameters for AriaNet parameters
+_C.MODEL.ARIANET = CN()
+_C.MODEL.ARIANET.FRAME_NUM = 64
+_C.MODEL.ARIANET.LOSS_TRAIN = 'physnet_pearson'
+_C.MODEL.ARIANET.LOSS_VAL = 'physnet_pearson'
+_C.MODEL.ARIANET.INTEGRATION_STRATEGY = 'add'
+_C.MODEL.ARIANET.INTEGRATION_LAYERS = [3]
+_C.MODEL.ARIANET.SENSOR_TYPE = 'imu'
+_C.MODEL.ARIANET.SKIP_CONNECTIONS = False
 
 # -----------------------------------------------------------------------------
 # Specific parameters for iBVPNet parameters
@@ -345,6 +356,7 @@ _C.MODEL.PHYSFORMER.FF_DIM = 144
 _C.MODEL.PHYSFORMER.NUM_HEADS = 4
 _C.MODEL.PHYSFORMER.NUM_LAYERS = 12
 _C.MODEL.PHYSFORMER.THETA = 0.7
+_C.MODEL.PHYSFORMER.LOSS = 'physnet_pearson'
 
 # -----------------------------------------------------------------------------
 # Inference settings

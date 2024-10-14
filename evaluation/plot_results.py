@@ -30,8 +30,8 @@ def generate_folder_structure(dim=128, clip_length=128, data_type='Raw', is_unsu
     return f"AriaPPG_SizeW{dim}_SizeH{dim}_ClipLength{clip_length}_DataType{data_type}_DataAugNone_LabelType{label_type}_Crop_faceFalse_BackendHC_Large_boxTrue_Large_size1.5_Dyamic_DetFalse_det_len30_Median_face_boxFalse{unsupervised_flag}"
 
 # Static variables
-ROOT_PATH_UNSUPERVISED = './runs/infer_configs/UNSUPERVISED/'
-ROOT_PATH_SUPERVISED = './runs/'
+ROOT_PATH_UNSUPERVISED = '/cluster/scratch/boehis/runs/infer_configs/UNSUPERVISED/'
+ROOT_PATH_SUPERVISED = '/cluster/scratch/boehis/runs/'
 
 PATHS = [
     # ('none',        os.path.join(ROOT_PATH_UNSUPERVISED, 'none', 'len128', 'res128', generate_folder_structure(), 'saved_outputs')),
@@ -55,22 +55,50 @@ PATHS = [
     # ('median', os.path.join(ROOT_PATH_SUPERVISED, 'infer_configs', 'PURE_TSCAN',                       'median',                                   generate_folder_structure(dim=72, clip_length=128, data_type='DiffNormalized_Standardized', is_unsupervised=False),   'saved_test_outputs')),
     # ('median', os.path.join(ROOT_PATH_SUPERVISED, 'infer_configs', 'PURE_iBVPNet_DiffNormalized',      'median',                                   generate_folder_structure(dim=128, clip_length=128, data_type='DiffNormalized', is_unsupervised=False),   'saved_test_outputs')),
 
-    ('median', os.path.join(ROOT_PATH_SUPERVISED, 'train_configs', 'DeepPhys',   'median', 'loso_cv_finetune')),
-    ('median', os.path.join(ROOT_PATH_SUPERVISED, 'train_configs', 'DeepPhys',   'median', 'loso_cv_retrain')),
 
-    ('median', os.path.join(ROOT_PATH_SUPERVISED, 'train_configs', 'PhysFormer', 'median', 'loso_cv_finetune')),
-    ('median', os.path.join(ROOT_PATH_SUPERVISED, 'train_configs', 'PhysFormer', 'median', 'loso_cv_retrain')),
+    # ('median', os.path.join(ROOT_PATH_SUPERVISED, 'train_configs', 'DeepPhys',   'median', 'loso_cv_finetune')),
+    # ('median', os.path.join(ROOT_PATH_SUPERVISED, 'train_configs', 'DeepPhys',   'median', 'loso_cv_retrain')),
 
-    ('median', os.path.join(ROOT_PATH_SUPERVISED, 'train_configs', 'PhysNet',    'median', 'loso_cv_finetune')),
-    ('median', os.path.join(ROOT_PATH_SUPERVISED, 'train_configs', 'PhysNet',    'median', 'loso_cv_retrain')),
+    # ('median', os.path.join(ROOT_PATH_SUPERVISED, 'train_configs', 'PhysFormer', 'median', 'loso_cv_finetune')),
+    # ('median', os.path.join(ROOT_PATH_SUPERVISED, 'train_configs', 'PhysFormer', 'median', 'loso_cv_retrain')),
 
-    ('median', os.path.join(ROOT_PATH_SUPERVISED, 'train_configs', 'Tscan',      'median', 'loso_cv_finetune')),
-    ('median', os.path.join(ROOT_PATH_SUPERVISED, 'train_configs', 'Tscan',      'median', 'loso_cv_retrain')),
+    # ('median', os.path.join(ROOT_PATH_SUPERVISED, 'train_configs', 'PhysNet',    'median', 'loso_cv_finetune')),
+    # ('median', os.path.join(ROOT_PATH_SUPERVISED, 'train_configs', 'PhysNet',    'median', 'loso_cv_retrain')),
 
-    ('median', os.path.join(ROOT_PATH_SUPERVISED, 'train_configs', 'iBVPNet',    'median', 'loso_cv_finetune')),
-    ('median', os.path.join(ROOT_PATH_SUPERVISED, 'train_configs', 'iBVPNet',    'median', 'loso_cv_retrain')),
+    # ('median', os.path.join(ROOT_PATH_SUPERVISED, 'train_configs', 'Tscan',      'median', 'loso_cv_finetune')),
+    # ('median', os.path.join(ROOT_PATH_SUPERVISED, 'train_configs', 'Tscan',      'median', 'loso_cv_retrain')),
 
-    
+    # ('median', os.path.join(ROOT_PATH_SUPERVISED, 'train_configs', 'iBVPNet',    'median', 'loso_cv_finetune')),
+    # ('median', os.path.join(ROOT_PATH_SUPERVISED, 'train_configs', 'iBVPNet',    'median', 'loso_cv_retrain')),
+
+    # ('median', os.path.join(ROOT_PATH_SUPERVISED, 'train_configs', 'PhysNet',    'median', 'loss_function_comparison', 'loso_mcc')),
+    # ('median', os.path.join(ROOT_PATH_SUPERVISED, 'train_configs', 'PhysNet',    'median', 'loss_function_comparison', 'loso_soft_macc')),
+    # ('median', os.path.join(ROOT_PATH_SUPERVISED, 'train_configs', 'PhysNet',    'median', 'loss_function_comparison', 'loso_soft_msacc')),
+    # ('median', os.path.join(ROOT_PATH_SUPERVISED, 'train_configs', 'PhysNet',    'median', 'loss_function_comparison', 'loso_talos')),
+    # ('median', os.path.join(ROOT_PATH_SUPERVISED, 'train_configs', 'PhysNet',    'median', 'loss_function_comparison', 'loso_val_macc')),
+
+    # ('median', os.path.join(ROOT_PATH_SUPERVISED, 'train_configs', 'PhysFormer',    'median', 'loss_function_comparison', 'loso_mcc')),
+    # ('median', os.path.join(ROOT_PATH_SUPERVISED, 'train_configs', 'PhysFormer',    'median', 'loss_function_comparison', 'loso_soft_macc')),
+    # ('median', os.path.join(ROOT_PATH_SUPERVISED, 'train_configs', 'PhysFormer',    'median', 'loss_function_comparison', 'loso_soft_msacc')),
+    # ('median', os.path.join(ROOT_PATH_SUPERVISED, 'train_configs', 'PhysFormer',    'median', 'loss_function_comparison', 'loso_talos')),
+
+    ('median', os.path.join(ROOT_PATH_SUPERVISED, 'train_configs', 'PhysNet',  'median',  'multimodal', 'adaptive_norm_10_imu')),
+    ('median', os.path.join(ROOT_PATH_SUPERVISED, 'train_configs', 'PhysNet',  'median',  'multimodal', 'adaptive_norm_2_imu')),
+    ('median', os.path.join(ROOT_PATH_SUPERVISED, 'train_configs', 'PhysNet',  'median',  'multimodal', 'adaptive_norm_4_imu')),
+    ('median', os.path.join(ROOT_PATH_SUPERVISED, 'train_configs', 'PhysNet',  'median',  'multimodal', 'adaptive_norm_8_imu')),
+    ('median', os.path.join(ROOT_PATH_SUPERVISED, 'train_configs', 'PhysNet',  'median',  'multimodal', 'add_10_imu')),
+    ('median', os.path.join(ROOT_PATH_SUPERVISED, 'train_configs', 'PhysNet',  'median',  'multimodal', 'add_2_imu')),
+    ('median', os.path.join(ROOT_PATH_SUPERVISED, 'train_configs', 'PhysNet',  'median',  'multimodal', 'add_4_imu')),
+    ('median', os.path.join(ROOT_PATH_SUPERVISED, 'train_configs', 'PhysNet',  'median',  'multimodal', 'add_8_imu')),
+    ('median', os.path.join(ROOT_PATH_SUPERVISED, 'train_configs', 'PhysNet',  'median',  'multimodal', 'cat_10_imu')),
+    ('median', os.path.join(ROOT_PATH_SUPERVISED, 'train_configs', 'PhysNet',  'median',  'multimodal', 'cat_2_imu')),
+    ('median', os.path.join(ROOT_PATH_SUPERVISED, 'train_configs', 'PhysNet',  'median',  'multimodal', 'cat_4_imu')),
+    ('median', os.path.join(ROOT_PATH_SUPERVISED, 'train_configs', 'PhysNet',  'median',  'multimodal', 'cat_8_imu')),
+    ('median', os.path.join(ROOT_PATH_SUPERVISED, 'train_configs', 'PhysNet',  'median',  'multimodal', 'cross_attention_10_imu')),
+    ('median', os.path.join(ROOT_PATH_SUPERVISED, 'train_configs', 'PhysNet',  'median',  'multimodal', 'cross_attention_2_imu')),
+    ('median', os.path.join(ROOT_PATH_SUPERVISED, 'train_configs', 'PhysNet',  'median',  'multimodal', 'cross_attention_4_imu')),
+    ('median', os.path.join(ROOT_PATH_SUPERVISED, 'train_configs', 'PhysNet',  'median',  'multimodal', 'cross_attention_8_imu')),
+
     # ('median', os.path.join(ROOT_PATH_SUPERVISED, 'train_configs', 'DeepPhys',                         'median',                       'pxt1',     generate_folder_structure(dim=72,  clip_length=128, data_type='DiffNormalized_Standardized', is_unsupervised=False),              'saved_test_outputs')),
     # ('median', os.path.join(ROOT_PATH_SUPERVISED, 'train_configs', 'DeepPhys',                         'median',                       'pxt1stat', generate_folder_structure(dim=72,  clip_length=128, data_type='DiffNormalized_Standardized', is_unsupervised=False),              'saved_test_outputs')),
     # ('median', os.path.join(ROOT_PATH_SUPERVISED, 'train_configs', 'DeepPhys',                         'median',                       'pxtx',     generate_folder_structure(dim=72,  clip_length=128, data_type='DiffNormalized_Standardized', is_unsupervised=False),              'saved_test_outputs')),
@@ -153,6 +181,9 @@ def plot_boxenplot_metrics(x, y_list, hue, data, palette, output_path, plot_name
         plt.xlabel(xlabel)
         plt.legend(title=legend_title)
         plt.tight_layout()
+        import warnings
+        from matplotlib.cbook.deprecation import MatplotlibDeprecationWarning
+        warnings.filterwarnings("ignore", category=MatplotlibDeprecationWarning)
         plt.savefig(os.path.join(output_path, f'{method}_{y}_{plot_name}_boxen_plot.png'))
         plt.close()
 
@@ -246,7 +277,7 @@ def generate_head_movement_comparison_plots(df, method, output_path, smoothing_m
     hue = 'Camera Type'
     plot_boxenplot_metrics(
         x=x, y_list=y_list, hue=hue, data=df,
-        palette=[COLOR_STAT_FAR, COLOR_HEAD_STAT, COLOR_HEAD_MOV], output_path=output_path, plot_name=plot_name, method=method, smoothing_method=smoothing_method,
+        palette=[COLOR_HEAD_STAT, COLOR_HEAD_MOV], output_path=output_path, plot_name=plot_name, method=method, smoothing_method=smoothing_method,
         hue_order=[TEXT_HEAD_STILL, TEXT_HEAD_MOVING],
         name_map={
             'abs_err_fft': 'Absolute Error (FFT)',

@@ -10,7 +10,7 @@ TRAIN:
     LOSO_SUBJECTS: ['P001', 'P002', 'P003', 'P004', 'P005', 'P006', 'P007', 'P008', 'P009', 'P010', 'P011', 'P012', 'P014', 'P015', 'P016', 'P017', 'P018', 'P019', 'P020', 'P021', 'P023','P024']    
     FS: 30
     DATASET: AriaPPG
-    DO_PREPROCESS: False               # if first time, should be true
+    DO_PREPROCESS: True               # if first time, should be true
     DATA_FORMAT: NCDHW
     DATA_PATH: "/cluster/scratch/boehis/preprocessed/median/len128/raw"                     # DiffNormalized dataset path, need to be updated
     CACHED_PATH: "/cluster/scratch/boehis/preprocessed/median/len128/prep"
