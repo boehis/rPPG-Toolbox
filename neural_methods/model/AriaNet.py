@@ -11,6 +11,17 @@ class Add_Integration(nn.Module):
         # Add the expanded sensor data to x
         return x + sensor_data_expanded
 
+class Modulate_Integration(nn.Module):
+    def forward(self, x, sensor_data):
+        # Expand sensor data to match spatial dimensions of x
+        sensor_data = nn.Sigmoid(sensor_data)
+        sensor_data_expanded = sensor_data.unsqueeze(-1).unsqueeze(-1)  # [batch_size, channels, T', 1, 1]
+        spatial_size = x.shape[-2:]  # (height, width)
+        sensor_data_expanded = sensor_data_expanded.expand(-1, -1, -1, *spatial_size)
+        
+        # Add the expanded sensor data to x
+        return x * sensor_data_expanded
+
 class Cat_Integration(nn.Module):
     def __init__(self):
         super(Cat_Integration, self).__init__()
@@ -276,6 +287,9 @@ class AriaNet_Multimodal(nn.Module):
         if integration_strategy == 'add':
             for layer_idx in integration_layers:
                 self.integrate[str(layer_idx)] = Add_Integration()
+        elif integration_strategy == 'modulate':
+            for layer_idx in integration_layers:
+                self.integrate[str(layer_idx)] = Modulate_Integration()
         elif integration_strategy == 'cat':
             for layer_idx in integration_layers:
                 self.integrate[str(layer_idx)] = Cat_Integration()

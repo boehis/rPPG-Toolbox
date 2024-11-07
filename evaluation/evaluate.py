@@ -14,25 +14,25 @@ tqdm.pandas()
 
 # Function to generate the folder structure for unsupervised and supervised data
 def generate_folder_structure(dim=128, clip_length=128, data_type='Raw', is_unsupervised=True):
-    unsupervised_flag = 'unsupervised' if is_unsupervised else ''
+    unsupervised_flag = '_unsupervised' if is_unsupervised else ''
     label_type = 'DiffNormalized' if data_type == 'DiffNormalized_Standardized' else data_type 
     return f"AriaPPG_SizeW{dim}_SizeH{dim}_ClipLength{clip_length}_DataType{data_type}_DataAugNone_LabelType{label_type}_Crop_faceFalse_BackendHC_Large_boxTrue_Large_size1.5_Dyamic_DetFalse_det_len30_Median_face_boxFalse{unsupervised_flag}"
 
 # Paths for unsupervised data
-UNSUPERVISED_ROOT_PATH = './runs/infer_configs/UNSUPERVISED/'
+UNSUPERVISED_ROOT_PATH = '/cluster/scratch/boehis/runs/infer_configs/UNSUPERVISED/'
 UNSUPERVISED_PATHS = [
     # os.path.join(UNSUPERVISED_ROOT_PATH, 'none', 'len128', 'res128', generate_folder_structure(), 'saved_outputs'),
     # os.path.join(UNSUPERVISED_ROOT_PATH, 'first_frame', 'len128', 'res128', generate_folder_structure(), 'saved_outputs'),
-    # os.path.join(UNSUPERVISED_ROOT_PATH, 'median', 'len128', 'res128', generate_folder_structure(), 'saved_outputs'),
+    os.path.join(UNSUPERVISED_ROOT_PATH, 'median', 'len128', 'res128', generate_folder_structure(), 'saved_outputs'),
     # os.path.join(UNSUPERVISED_ROOT_PATH, 'lowpass', 'len128', 'res128', generate_folder_structure(), 'saved_outputs'),
 ]
 
 # Paths for supervised data
-SUPERVISED_ROOT_PATH = './runs/'
+SUPERVISED_ROOT_PATH = '/cluster/scratch/boehis/runs/'
 SUPERVISED_PATHS = [
     # os.path.join(SUPERVISED_ROOT_PATH, 'infer_configs', 'PURE_PhysNet_DiffNormalized', 'none', generate_folder_structure(data_type='DiffNormalized', is_unsupervised=False), 'saved_test_outputs', 'PURE_PhysNet_DiffNormalized_AriaPPG_outputs.pickle'),
     # os.path.join(SUPERVISED_ROOT_PATH, 'infer_configs', 'PURE_PhysNet_DiffNormalized', 'first_frame', generate_folder_structure(data_type='DiffNormalized', is_unsupervised=False), 'saved_test_outputs', 'PURE_PhysNet_DiffNormalized_AriaPPG_outputs.pickle'),
-    # os.path.join(SUPERVISED_ROOT_PATH, 'infer_configs', 'PURE_PhysNet_DiffNormalized', 'median', generate_folder_structure(data_type='DiffNormalized', is_unsupervised=False), 'saved_test_outputs', 'PURE_PhysNet_DiffNormalized_AriaPPG_outputs.pickle'),
+    os.path.join(SUPERVISED_ROOT_PATH, 'infer_configs', 'PURE_PhysNet_DiffNormalized', 'median', generate_folder_structure(data_type='DiffNormalized', is_unsupervised=False), 'saved_test_outputs', 'PURE_PhysNet_DiffNormalized_AriaPPG_outputs.pickle'),
     # os.path.join(SUPERVISED_ROOT_PATH, 'infer_configs', 'PURE_PhysNet_DiffNormalized', 'lowpass', generate_folder_structure(data_type='DiffNormalized', is_unsupervised=False), 'saved_test_outputs', 'PURE_PhysNet_DiffNormalized_AriaPPG_outputs.pickle'),
     
     # os.path.join(SUPERVISED_ROOT_PATH, 'infer_configs', 'UBFC-rPPG_PhysNet_DiffNormalized', 'none', generate_folder_structure(data_type='DiffNormalized', is_unsupervised=False), 'saved_test_outputs', 'UBFC-rPPG_PhysNet_DiffNormalized_AriaPPG_outputs.pickle'),
@@ -43,35 +43,10 @@ SUPERVISED_PATHS = [
 
 
     # os.path.join(SUPERVISED_ROOT_PATH, 'infer_configs', 'PURE_DeepPhys',                    'median',                                   generate_folder_structure(dim=72, clip_length=128, data_type='DiffNormalized_Standardized', is_unsupervised=False),   'saved_test_outputs',   'PURE_DeepPhys_AriaPPG_outputs.pickle'),
-    os.path.join(SUPERVISED_ROOT_PATH, 'infer_configs', 'PURE_PhysFormer_DiffNormalized',   'median',                                   generate_folder_structure(dim=128, clip_length=160, data_type='DiffNormalized', is_unsupervised=False),   'saved_test_outputs',   'PURE_PhysFormer_DiffNormalized_AriaPPG_outputs.pickle'),
+    # os.path.join(SUPERVISED_ROOT_PATH, 'infer_configs', 'PURE_PhysFormer_DiffNormalized',   'median',                                   generate_folder_structure(dim=128, clip_length=160, data_type='DiffNormalized', is_unsupervised=False),   'saved_test_outputs',   'PURE_PhysFormer_DiffNormalized_AriaPPG_outputs.pickle'),
     # os.path.join(SUPERVISED_ROOT_PATH, 'infer_configs', 'PURE_TSCAN',                       'median',                                   generate_folder_structure(dim=72, clip_length=128, data_type='DiffNormalized_Standardized', is_unsupervised=False),   'saved_test_outputs',   'PURE_TSCAN_AriaPPG_outputs.pickle'),
     # os.path.join(SUPERVISED_ROOT_PATH, 'infer_configs', 'PURE_iBVPNet_DiffNormalized',      'median',                                   generate_folder_structure(dim=128, clip_length=128, data_type='DiffNormalized', is_unsupervised=False),   'saved_test_outputs',   'PURE_iBVPNet_DiffNormalized_AriaPPG_outputs.pickle'),
 
-    # os.path.join(SUPERVISED_ROOT_PATH, 'train_configs', 'DeepPhys',                         'median',                       'pxt1',     generate_folder_structure(dim=72,  clip_length=128, data_type='DiffNormalized_Standardized', is_unsupervised=False),              'saved_test_outputs',   'AriaPPG_AriaPPG_deepphys_outputs.pickle'),
-    # os.path.join(SUPERVISED_ROOT_PATH, 'train_configs', 'DeepPhys',                         'median',                       'pxt1stat', generate_folder_structure(dim=72,  clip_length=128, data_type='DiffNormalized_Standardized', is_unsupervised=False),              'saved_test_outputs',   'AriaPPG_AriaPPG_deepphys_outputs.pickle'),
-    # os.path.join(SUPERVISED_ROOT_PATH, 'train_configs', 'DeepPhys',                         'median',                       'pxtx',     generate_folder_structure(dim=72,  clip_length=128, data_type='DiffNormalized_Standardized', is_unsupervised=False),              'saved_test_outputs',   'AriaPPG_AriaPPG_deepphys_outputs.pickle'),
-    # os.path.join(SUPERVISED_ROOT_PATH, 'train_configs', 'PhysFormer',                       'median',                       'pxt1',     generate_folder_structure(dim=128, clip_length=160, data_type='Raw', is_unsupervised=False),              'saved_test_outputs',   'AriaPPG_AriaPPG_physformer_outputs.pickle'),
-    # os.path.join(SUPERVISED_ROOT_PATH, 'train_configs', 'PhysFormer',                       'median',                       'pxt1stat', generate_folder_structure(dim=128, clip_length=160, data_type='Raw', is_unsupervised=False),              'saved_test_outputs',   'AriaPPG_AriaPPG_physformer_outputs.pickle'),
-    # os.path.join(SUPERVISED_ROOT_PATH, 'train_configs', 'PhysFormer',                       'median',                       'pxtx',     generate_folder_structure(dim=128, clip_length=160, data_type='Raw', is_unsupervised=False),              'saved_test_outputs',   'AriaPPG_AriaPPG_physformer_outputs.pickle'),
-    # os.path.join(SUPERVISED_ROOT_PATH, 'train_configs', 'PhysNet',                          'median',                       'pxt1',     generate_folder_structure(dim=128, clip_length=128, data_type='Raw', is_unsupervised=False),              'saved_test_outputs',   'AriaPPG_AriaPPG_physnet_outputs.pickle'),
-    # os.path.join(SUPERVISED_ROOT_PATH, 'train_configs', 'PhysNet',                          'median',                       'pxt1stat', generate_folder_structure(dim=128, clip_length=128, data_type='Raw', is_unsupervised=False),              'saved_test_outputs',   'AriaPPG_AriaPPG_physnet_outputs.pickle'),
-    # os.path.join(SUPERVISED_ROOT_PATH, 'train_configs', 'PhysNet',                          'median',                       'pxtx',     generate_folder_structure(dim=128, clip_length=128, data_type='Raw', is_unsupervised=False),              'saved_test_outputs',   'AriaPPG_AriaPPG_physnet_outputs.pickle'),
-    # os.path.join(SUPERVISED_ROOT_PATH, 'train_configs', 'Tscan',                            'median',                       'pxt1',     generate_folder_structure(dim=72,  clip_length=128, data_type='DiffNormalized_Standardized', is_unsupervised=False),              'saved_test_outputs',   'AriaPPG_AriaPPG_tscan_outputs.pickle'),
-    # os.path.join(SUPERVISED_ROOT_PATH, 'train_configs', 'Tscan',                            'median',                       'pxt1stat', generate_folder_structure(dim=72,  clip_length=128, data_type='DiffNormalized_Standardized', is_unsupervised=False),              'saved_test_outputs',   'AriaPPG_AriaPPG_tscan_outputs.pickle'),
-    # os.path.join(SUPERVISED_ROOT_PATH, 'train_configs', 'Tscan',                            'median',                       'pxtx',     generate_folder_structure(dim=72,  clip_length=128, data_type='DiffNormalized_Standardized', is_unsupervised=False),              'saved_test_outputs',   'AriaPPG_AriaPPG_tscan_outputs.pickle'),
-    # os.path.join(SUPERVISED_ROOT_PATH, 'train_configs', 'iBVPNet',                          'median',                       'pxt1',     generate_folder_structure(dim=128, clip_length=128, data_type='Raw', is_unsupervised=False),              'saved_test_outputs',   'AriaPPG_AriaPPG_ibvpnet_outputs.pickle'),
-    # os.path.join(SUPERVISED_ROOT_PATH, 'train_configs', 'iBVPNet',                          'median',                       'pxt1stat', generate_folder_structure(dim=128, clip_length=128, data_type='Raw', is_unsupervised=False),              'saved_test_outputs',   'AriaPPG_AriaPPG_ibvpnet_outputs.pickle'),
-    # os.path.join(SUPERVISED_ROOT_PATH, 'train_configs', 'iBVPNet',                          'median',                       'pxtx',     generate_folder_structure(dim=128, clip_length=128, data_type='Raw', is_unsupervised=False),              'saved_test_outputs',   'AriaPPG_AriaPPG_ibvpnet_outputs.pickle'),
-
-    # os.path.join(SUPERVISED_ROOT_PATH, 'train_configs', 'PhysFormer',                       'median',   'diffnormalized',   'pxt1',     generate_folder_structure(dim=128, clip_length=160, data_type='DiffNormalized', is_unsupervised=False),   'saved_test_outputs',   'AriaPPG_AriaPPG_physformer_outputs.pickle'),
-    # os.path.join(SUPERVISED_ROOT_PATH, 'train_configs', 'PhysFormer',                       'median',   'diffnormalized',   'pxt1stat', generate_folder_structure(dim=128, clip_length=160, data_type='DiffNormalized', is_unsupervised=False),   'saved_test_outputs',   'AriaPPG_AriaPPG_physformer_outputs.pickle'),
-    # os.path.join(SUPERVISED_ROOT_PATH, 'train_configs', 'PhysFormer',                       'median',   'diffnormalized',   'pxtx',     generate_folder_structure(dim=128, clip_length=160, data_type='DiffNormalized', is_unsupervised=False),   'saved_test_outputs',   'AriaPPG_AriaPPG_physformer_outputs.pickle'),
-    # os.path.join(SUPERVISED_ROOT_PATH, 'train_configs', 'PhysNet',                          'median',   'diffnormalized',   'pxt1',     generate_folder_structure(dim=128, clip_length=128, data_type='DiffNormalized', is_unsupervised=False),   'saved_test_outputs',   'AriaPPG_AriaPPG_physnet_outputs.pickle'),
-    # os.path.join(SUPERVISED_ROOT_PATH, 'train_configs', 'PhysNet',                          'median',   'diffnormalized',   'pxt1stat', generate_folder_structure(dim=128, clip_length=128, data_type='DiffNormalized', is_unsupervised=False),   'saved_test_outputs',   'AriaPPG_AriaPPG_physnet_outputs.pickle'),
-    # os.path.join(SUPERVISED_ROOT_PATH, 'train_configs', 'PhysNet',                          'median',   'diffnormalized',   'pxtx',     generate_folder_structure(dim=128, clip_length=128, data_type='DiffNormalized', is_unsupervised=False),   'saved_test_outputs',   'AriaPPG_AriaPPG_physnet_outputs.pickle'),
-    # os.path.join(SUPERVISED_ROOT_PATH, 'train_configs', 'iBVPNet',                          'median',   'diffnormalized',   'pxt1',     generate_folder_structure(dim=128, clip_length=128, data_type='DiffNormalized', is_unsupervised=False),   'saved_test_outputs',   'AriaPPG_AriaPPG_ibvpnet_outputs.pickle'),
-    # os.path.join(SUPERVISED_ROOT_PATH, 'train_configs', 'iBVPNet',                          'median',   'diffnormalized',   'pxt1stat', generate_folder_structure(dim=128, clip_length=128, data_type='DiffNormalized', is_unsupervised=False),   'saved_test_outputs',   'AriaPPG_AriaPPG_ibvpnet_outputs.pickle'),
-    # os.path.join(SUPERVISED_ROOT_PATH, 'train_configs', 'iBVPNet',                          'median',   'diffnormalized',   'pxtx',     generate_folder_structure(dim=128, clip_length=128, data_type='DiffNormalized', is_unsupervised=False),   'saved_test_outputs',   'AriaPPG_AriaPPG_ibvpnet_outputs.pickle'),
 ]
 
 # Reform function to reshape the data
@@ -89,13 +64,13 @@ def reform_data(df_slice):
 def read_csv_files(path):
     data_frames = []
     for result_file in os.listdir(path):
-        if result_file.endswith('.csv'):
+        if result_file.endswith('_all_results.csv'):
             df = pd.read_csv(os.path.join(path, result_file), index_col=0)
             df['method'] = result_file.split('_')[0]
             data_frames.append(df)
     combined_df = pd.concat(data_frames)
     combined_df['prediction'] = combined_df['prediction'].apply(eval)
-    combined_df['label'] = combined_df['label'].apply(eval)
+    combined_df['label'] = combined_df['label'].apply(eval) 
 
     result_list = []
     for (index, method), group in tqdm(combined_df.groupby(['index', 'method']), desc='Reforming Data'):

@@ -7,9 +7,9 @@ import numpy as np
 import pickle
 import torch
 from tqdm import tqdm
-from joblib import Parallel, delayed
 from .post_process import calculate_metric_per_video
 from .metrics import _reform_data_from_dict
+from joblib import Parallel, delayed
 tqdm.pandas()
 
 # Function to generate the folder structure for unsupervised and supervised data
@@ -45,22 +45,40 @@ SUPERVISED_PATHS = [
     # ('PhysFormer_loso_soft_msacc',     os.path.join(SUPERVISED_ROOT_PATH, 'PhysFormer',     'median',  'loss_function_comparison', 'loso_soft_msacc')) , 
     # ('PhysFormer_loso_talos',     os.path.join(SUPERVISED_ROOT_PATH, 'PhysFormer',     'median',  'loss_function_comparison', 'loso_talos')) ,
     
-    ('PhysNet_multim_adaptive_norm_10_imu',    os.path.join(SUPERVISED_ROOT_PATH, 'PhysNet',     'median',  'multimodal', 'adaptive_norm_10_imu')),
-    ('PhysNet_multim_adaptive_norm_2_imu',     os.path.join(SUPERVISED_ROOT_PATH, 'PhysNet',     'median',  'multimodal', 'adaptive_norm_2_imu')),
-    ('PhysNet_multim_adaptive_norm_4_imu',     os.path.join(SUPERVISED_ROOT_PATH, 'PhysNet',     'median',  'multimodal', 'adaptive_norm_4_imu')),
-    ('PhysNet_multim_adaptive_norm_8_imu',     os.path.join(SUPERVISED_ROOT_PATH, 'PhysNet',     'median',  'multimodal', 'adaptive_norm_8_imu')),
-    ('PhysNet_multim_add_10_imu',              os.path.join(SUPERVISED_ROOT_PATH, 'PhysNet',     'median',  'multimodal', 'add_10_imu')),
-    ('PhysNet_multim_add_2_imu',               os.path.join(SUPERVISED_ROOT_PATH, 'PhysNet',     'median',  'multimodal', 'add_2_imu')),
-    ('PhysNet_multim_add_4_imu',               os.path.join(SUPERVISED_ROOT_PATH, 'PhysNet',     'median',  'multimodal', 'add_4_imu')),
-    ('PhysNet_multim_add_8_imu',               os.path.join(SUPERVISED_ROOT_PATH, 'PhysNet',     'median',  'multimodal', 'add_8_imu')),
-    ('PhysNet_multim_cat_10_imu',              os.path.join(SUPERVISED_ROOT_PATH, 'PhysNet',     'median',  'multimodal', 'cat_10_imu')),
-    ('PhysNet_multim_cat_2_imu',               os.path.join(SUPERVISED_ROOT_PATH, 'PhysNet',     'median',  'multimodal', 'cat_2_imu')),
-    ('PhysNet_multim_cat_4_imu',               os.path.join(SUPERVISED_ROOT_PATH, 'PhysNet',     'median',  'multimodal', 'cat_4_imu')),
-    ('PhysNet_multim_cat_8_imu',               os.path.join(SUPERVISED_ROOT_PATH, 'PhysNet',     'median',  'multimodal', 'cat_8_imu')),
-    ('PhysNet_multim_cross_attention_10_imu',  os.path.join(SUPERVISED_ROOT_PATH, 'PhysNet',     'median',  'multimodal', 'cross_attention_10_imu')),
-    ('PhysNet_multim_cross_attention_2_imu',   os.path.join(SUPERVISED_ROOT_PATH, 'PhysNet',     'median',  'multimodal', 'cross_attention_2_imu')),
-    ('PhysNet_multim_cross_attention_4_imu',   os.path.join(SUPERVISED_ROOT_PATH, 'PhysNet',     'median',  'multimodal', 'cross_attention_4_imu')),
-    ('PhysNet_multim_cross_attention_8_imu',   os.path.join(SUPERVISED_ROOT_PATH, 'PhysNet',     'median',  'multimodal', 'cross_attention_8_imu')),
+    # ('PhysNet_multim_adaptive_norm_10_imu',    os.path.join(SUPERVISED_ROOT_PATH, 'PhysNet',     'median',  'multimodal', 'adaptive_norm_10_imu')),
+    # ('PhysNet_multim_adaptive_norm_10_quaternion',    os.path.join(SUPERVISED_ROOT_PATH, 'PhysNet',     'median',  'multimodal', 'adaptive_norm_10_quaternion')),
+    # ('PhysNet_multim_adaptive_norm_2_imu',     os.path.join(SUPERVISED_ROOT_PATH, 'PhysNet',     'median',  'multimodal', 'adaptive_norm_2_imu')),
+    # ('PhysNet_multim_adaptive_norm_2_quaternion',     os.path.join(SUPERVISED_ROOT_PATH, 'PhysNet',     'median',  'multimodal', 'adaptive_norm_2_quaternion')),
+    # ('PhysNet_multim_adaptive_norm_4_imu',     os.path.join(SUPERVISED_ROOT_PATH, 'PhysNet',     'median',  'multimodal', 'adaptive_norm_4_imu')),
+    # ('PhysNet_multim_adaptive_norm_4_quaternion',     os.path.join(SUPERVISED_ROOT_PATH, 'PhysNet',     'median',  'multimodal', 'adaptive_norm_4_quaternion')),
+    # ('PhysNet_multim_adaptive_norm_8_imu',     os.path.join(SUPERVISED_ROOT_PATH, 'PhysNet',     'median',  'multimodal', 'adaptive_norm_8_imu')),
+    # ('PhysNet_multim_adaptive_norm_8_quaternion',     os.path.join(SUPERVISED_ROOT_PATH, 'PhysNet',     'median',  'multimodal', 'adaptive_norm_8_quaternion')),
+    # ('PhysNet_multim_add_10_imu',              os.path.join(SUPERVISED_ROOT_PATH, 'PhysNet',     'median',  'multimodal', 'add_10_imu')),
+    # ('PhysNet_multim_add_10_quaternion',              os.path.join(SUPERVISED_ROOT_PATH, 'PhysNet',     'median',  'multimodal', 'add_10_quaternion')),
+    # ('PhysNet_multim_add_2_imu',               os.path.join(SUPERVISED_ROOT_PATH, 'PhysNet',     'median',  'multimodal', 'add_2_imu')),
+    # ('PhysNet_multim_add_2_quaternion',               os.path.join(SUPERVISED_ROOT_PATH, 'PhysNet',     'median',  'multimodal', 'add_2_quaternion')),
+    # ('PhysNet_multim_add_4_imu',               os.path.join(SUPERVISED_ROOT_PATH, 'PhysNet',     'median',  'multimodal', 'add_4_imu')),
+    # ('PhysNet_multim_add_4_quaternion',               os.path.join(SUPERVISED_ROOT_PATH, 'PhysNet',     'median',  'multimodal', 'add_4_quaternion')),
+    # ('PhysNet_multim_add_8_imu',               os.path.join(SUPERVISED_ROOT_PATH, 'PhysNet',     'median',  'multimodal', 'add_8_imu')),
+    # ('PhysNet_multim_add_8_quaternion',               os.path.join(SUPERVISED_ROOT_PATH, 'PhysNet',     'median',  'multimodal', 'add_8_quaternion')),
+    # ('PhysNet_multim_cat_10_imu',              os.path.join(SUPERVISED_ROOT_PATH, 'PhysNet',     'median',  'multimodal', 'cat_10_imu')),
+    # ('PhysNet_multim_cat_10_quaternion',              os.path.join(SUPERVISED_ROOT_PATH, 'PhysNet',     'median',  'multimodal', 'cat_10_quaternion')),
+    # ('PhysNet_multim_cat_2_imu',               os.path.join(SUPERVISED_ROOT_PATH, 'PhysNet',     'median',  'multimodal', 'cat_2_imu')),
+    # ('PhysNet_multim_cat_2_quaternion',               os.path.join(SUPERVISED_ROOT_PATH, 'PhysNet',     'median',  'multimodal', 'cat_2_quaternion')),
+    # ('PhysNet_multim_cat_4_imu',               os.path.join(SUPERVISED_ROOT_PATH, 'PhysNet',     'median',  'multimodal', 'cat_4_imu')),
+    # ('PhysNet_multim_cat_4_quaternion',               os.path.join(SUPERVISED_ROOT_PATH, 'PhysNet',     'median',  'multimodal', 'cat_4_quaternion')),
+    # ('PhysNet_multim_cat_8_imu',               os.path.join(SUPERVISED_ROOT_PATH, 'PhysNet',     'median',  'multimodal', 'cat_8_imu')),
+    # ('PhysNet_multim_cat_8_quaternion',               os.path.join(SUPERVISED_ROOT_PATH, 'PhysNet',     'median',  'multimodal', 'cat_8_quaternion')),
+    # ('PhysNet_multim_cross_attention_10_imu',  os.path.join(SUPERVISED_ROOT_PATH, 'PhysNet',     'median',  'multimodal', 'cross_attention_10_imu')),
+    # ('PhysNet_multim_cross_attention_10_quaternion',  os.path.join(SUPERVISED_ROOT_PATH, 'PhysNet',     'median',  'multimodal', 'cross_attention_10_quaternion')),
+    # ('PhysNet_multim_cross_attention_2_imu',   os.path.join(SUPERVISED_ROOT_PATH, 'PhysNet',     'median',  'multimodal', 'cross_attention_2_imu')),
+    # ('PhysNet_multim_cross_attention_2_quaternion',   os.path.join(SUPERVISED_ROOT_PATH, 'PhysNet',     'median',  'multimodal', 'cross_attention_2_quaternion')),
+    # ('PhysNet_multim_cross_attention_4_imu',   os.path.join(SUPERVISED_ROOT_PATH, 'PhysNet',     'median',  'multimodal', 'cross_attention_4_imu')),
+    # ('PhysNet_multim_cross_attention_4_quaternion',   os.path.join(SUPERVISED_ROOT_PATH, 'PhysNet',     'median',  'multimodal', 'cross_attention_4_quaternion')),
+    # ('PhysNet_multim_cross_attention_8_imu',   os.path.join(SUPERVISED_ROOT_PATH, 'PhysNet',     'median',  'multimodal', 'cross_attention_8_imu')),
+    # ('PhysNet_multim_cross_attention_8_quaternion',   os.path.join(SUPERVISED_ROOT_PATH, 'PhysNet',     'median',  'multimodal', 'cross_attention_8_quaternion')),
+    ('PhysNet_multim_cross_attention_2_4_8_10_imu',   os.path.join(SUPERVISED_ROOT_PATH, 'PhysNet',     'median',  'multimodal', 'cross_attention_2_4_8_10_imu')),
+    ('PhysNet_multim_cross_attention_skip_8_imu',   os.path.join(SUPERVISED_ROOT_PATH, 'PhysNet',     'median',  'multimodal', 'cross_attention_skip_8_imu')),
 ]
 
 

@@ -67,6 +67,7 @@ def _compute_macc(pred_signal, gt_signal):
     pred = pred[:min_len]
     gt = gt[:min_len]
     lags = np.arange(0, len(pred)-1, 1)
+    lags = range(-15, 15 + 1)
     tlcc_list = []
     for lag in lags:
         cross_corr = np.abs(np.corrcoef(

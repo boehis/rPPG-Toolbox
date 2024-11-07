@@ -326,10 +326,10 @@ if __name__ == "__main__":
         # val_end=int(config.VALID.DATA.END        * (num_subjects-1))
 
 
-        train_start=int(    0.0 * (num_subjects-1))
-        train_end=int(  0.8 * (num_subjects-1))
-        val_start=int(  0.8 * (num_subjects-1))
-        val_end=int(    1.0 * (num_subjects-1))
+        train_start=int(    0.0 * (num_subjects-1)) # 0
+        train_end=int(  0.8 * (num_subjects-1))     # 16
+        val_start=int(  0.8 * (num_subjects-1))     # 16
+        val_end=int(    1.0 * (num_subjects-1))     # 21
 
         config.defrost()
 

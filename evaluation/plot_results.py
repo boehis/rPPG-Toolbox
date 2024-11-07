@@ -15,13 +15,13 @@ COLOR_HEAD_STAT = '#638DDB'
 COLOR_HEAD_MOV = '#63D9DB'
 
 TEXT_HEAD_STILL = 'Still'
-TEXT_HEAD_MOVING = 'Natural Movements'
+TEXT_HEAD_MOVING = 'Talking'
 TEXT_STAT_CLOSE = 'Close'
 TEXT_STAT_FAR = 'Far'
 
 SKIP_STATS = False
-# Y_LIST = ['abs_err_fft', 'abs_err_peak', 'macc']
 Y_LIST = ['abs_err_peak', 'macc']
+Y_LIST = ['abs_err_fft', 'abs_err_peak', 'macc']
 
 # Function to generate folder structure (as used in the processing script)
 def generate_folder_structure(dim=128, clip_length=128, data_type='Raw', is_unsupervised=True):
@@ -36,12 +36,11 @@ ROOT_PATH_SUPERVISED = '/cluster/scratch/boehis/runs/'
 PATHS = [
     # ('none',        os.path.join(ROOT_PATH_UNSUPERVISED, 'none', 'len128', 'res128', generate_folder_structure(), 'saved_outputs')),
     # ('first_frame', os.path.join(ROOT_PATH_UNSUPERVISED, 'first_frame', 'len128', 'res128', generate_folder_structure(), 'saved_outputs')),
-    # ('median',      os.path.join(ROOT_PATH_UNSUPERVISED, 'median', 'len128', 'res128', generate_folder_structure(), 'saved_outputs')),
+    ('median',      os.path.join(ROOT_PATH_UNSUPERVISED, 'median', 'len128', 'res128', generate_folder_structure(), 'saved_outputs')),
     # ('lowpass',     os.path.join(ROOT_PATH_UNSUPERVISED, 'lowpass', 'len128', 'res128', generate_folder_structure(), 'saved_outputs')),
 
     # ('none',        os.path.join(ROOT_PATH_SUPERVISED, 'infer_configs', 'PURE_PhysNet_DiffNormalized', 'none', generate_folder_structure(data_type='DiffNormalized', is_unsupervised=False), 'saved_test_outputs')),
     # ('first_frame', os.path.join(ROOT_PATH_SUPERVISED, 'infer_configs', 'PURE_PhysNet_DiffNormalized', 'first_frame', generate_folder_structure(data_type='DiffNormalized', is_unsupervised=False), 'saved_test_outputs')),
-    # ('median',      os.path.join(ROOT_PATH_SUPERVISED, 'infer_configs', 'PURE_PhysNet_DiffNormalized', 'median', generate_folder_structure(data_type='DiffNormalized', is_unsupervised=False), 'saved_test_outputs')),
     # ('lowpass',     os.path.join(ROOT_PATH_SUPERVISED, 'infer_configs', 'PURE_PhysNet_DiffNormalized', 'lowpass', generate_folder_structure(data_type='DiffNormalized', is_unsupervised=False), 'saved_test_outputs')),
     
     # ('none',        os.path.join(ROOT_PATH_SUPERVISED, 'infer_configs', 'UBFC-rPPG_PhysNet_DiffNormalized', 'none', generate_folder_structure(data_type='DiffNormalized', is_unsupervised=False), 'saved_test_outputs')),
@@ -50,6 +49,7 @@ PATHS = [
     # ('lowpass',     os.path.join(ROOT_PATH_SUPERVISED, 'infer_configs', 'UBFC-rPPG_PhysNet_DiffNormalized', 'lowpass', generate_folder_structure(data_type='DiffNormalized', is_unsupervised=False), 'saved_test_outputs')),
 
 
+    # ('median',      os.path.join(ROOT_PATH_SUPERVISED, 'infer_configs', 'PURE_PhysNet_DiffNormalized', 'median', generate_folder_structure(data_type='DiffNormalized', is_unsupervised=False), 'saved_test_outputs')),
     # ('median', os.path.join(ROOT_PATH_SUPERVISED, 'infer_configs', 'PURE_DeepPhys',                    'median',                                   generate_folder_structure(dim=72, clip_length=128, data_type='DiffNormalized_Standardized', is_unsupervised=False),   'saved_test_outputs')),
     # ('median', os.path.join(ROOT_PATH_SUPERVISED, 'infer_configs', 'PURE_PhysFormer_DiffNormalized',   'median',                                   generate_folder_structure(dim=128, clip_length=160, data_type='DiffNormalized', is_unsupervised=False),   'saved_test_outputs')),
     # ('median', os.path.join(ROOT_PATH_SUPERVISED, 'infer_configs', 'PURE_TSCAN',                       'median',                                   generate_folder_structure(dim=72, clip_length=128, data_type='DiffNormalized_Standardized', is_unsupervised=False),   'saved_test_outputs')),
@@ -82,48 +82,41 @@ PATHS = [
     # ('median', os.path.join(ROOT_PATH_SUPERVISED, 'train_configs', 'PhysFormer',    'median', 'loss_function_comparison', 'loso_soft_msacc')),
     # ('median', os.path.join(ROOT_PATH_SUPERVISED, 'train_configs', 'PhysFormer',    'median', 'loss_function_comparison', 'loso_talos')),
 
-    ('median', os.path.join(ROOT_PATH_SUPERVISED, 'train_configs', 'PhysNet',  'median',  'multimodal', 'adaptive_norm_10_imu')),
-    ('median', os.path.join(ROOT_PATH_SUPERVISED, 'train_configs', 'PhysNet',  'median',  'multimodal', 'adaptive_norm_2_imu')),
-    ('median', os.path.join(ROOT_PATH_SUPERVISED, 'train_configs', 'PhysNet',  'median',  'multimodal', 'adaptive_norm_4_imu')),
-    ('median', os.path.join(ROOT_PATH_SUPERVISED, 'train_configs', 'PhysNet',  'median',  'multimodal', 'adaptive_norm_8_imu')),
-    ('median', os.path.join(ROOT_PATH_SUPERVISED, 'train_configs', 'PhysNet',  'median',  'multimodal', 'add_10_imu')),
-    ('median', os.path.join(ROOT_PATH_SUPERVISED, 'train_configs', 'PhysNet',  'median',  'multimodal', 'add_2_imu')),
-    ('median', os.path.join(ROOT_PATH_SUPERVISED, 'train_configs', 'PhysNet',  'median',  'multimodal', 'add_4_imu')),
-    ('median', os.path.join(ROOT_PATH_SUPERVISED, 'train_configs', 'PhysNet',  'median',  'multimodal', 'add_8_imu')),
-    ('median', os.path.join(ROOT_PATH_SUPERVISED, 'train_configs', 'PhysNet',  'median',  'multimodal', 'cat_10_imu')),
-    ('median', os.path.join(ROOT_PATH_SUPERVISED, 'train_configs', 'PhysNet',  'median',  'multimodal', 'cat_2_imu')),
-    ('median', os.path.join(ROOT_PATH_SUPERVISED, 'train_configs', 'PhysNet',  'median',  'multimodal', 'cat_4_imu')),
-    ('median', os.path.join(ROOT_PATH_SUPERVISED, 'train_configs', 'PhysNet',  'median',  'multimodal', 'cat_8_imu')),
-    ('median', os.path.join(ROOT_PATH_SUPERVISED, 'train_configs', 'PhysNet',  'median',  'multimodal', 'cross_attention_10_imu')),
-    ('median', os.path.join(ROOT_PATH_SUPERVISED, 'train_configs', 'PhysNet',  'median',  'multimodal', 'cross_attention_2_imu')),
-    ('median', os.path.join(ROOT_PATH_SUPERVISED, 'train_configs', 'PhysNet',  'median',  'multimodal', 'cross_attention_4_imu')),
-    ('median', os.path.join(ROOT_PATH_SUPERVISED, 'train_configs', 'PhysNet',  'median',  'multimodal', 'cross_attention_8_imu')),
+    # ('median', os.path.join(ROOT_PATH_SUPERVISED, 'train_configs', 'PhysNet',  'median',  'multimodal', 'adaptive_norm_10_imu')),
+    # ('median', os.path.join(ROOT_PATH_SUPERVISED, 'train_configs', 'PhysNet',  'median',  'multimodal', 'adaptive_norm_10_quaternion')),
+    # ('median', os.path.join(ROOT_PATH_SUPERVISED, 'train_configs', 'PhysNet',  'median',  'multimodal', 'adaptive_norm_2_imu')),
+    # ('median', os.path.join(ROOT_PATH_SUPERVISED, 'train_configs', 'PhysNet',  'median',  'multimodal', 'adaptive_norm_2_quaternion')),
+    # ('median', os.path.join(ROOT_PATH_SUPERVISED, 'train_configs', 'PhysNet',  'median',  'multimodal', 'adaptive_norm_4_imu')),
+    # ('median', os.path.join(ROOT_PATH_SUPERVISED, 'train_configs', 'PhysNet',  'median',  'multimodal', 'adaptive_norm_4_quaternion')),
+    # ('median', os.path.join(ROOT_PATH_SUPERVISED, 'train_configs', 'PhysNet',  'median',  'multimodal', 'adaptive_norm_8_imu')),
+    # ('median', os.path.join(ROOT_PATH_SUPERVISED, 'train_configs', 'PhysNet',  'median',  'multimodal', 'adaptive_norm_8_quaternion')),
+    # ('median', os.path.join(ROOT_PATH_SUPERVISED, 'train_configs', 'PhysNet',  'median',  'multimodal', 'add_10_imu')),
+    # ('median', os.path.join(ROOT_PATH_SUPERVISED, 'train_configs', 'PhysNet',  'median',  'multimodal', 'add_10_quaternion')),
+    # ('median', os.path.join(ROOT_PATH_SUPERVISED, 'train_configs', 'PhysNet',  'median',  'multimodal', 'add_2_imu')),
+    # ('median', os.path.join(ROOT_PATH_SUPERVISED, 'train_configs', 'PhysNet',  'median',  'multimodal', 'add_2_quaternion')),
+    # ('median', os.path.join(ROOT_PATH_SUPERVISED, 'train_configs', 'PhysNet',  'median',  'multimodal', 'add_4_imu')),
+    # ('median', os.path.join(ROOT_PATH_SUPERVISED, 'train_configs', 'PhysNet',  'median',  'multimodal', 'add_4_quaternion')),
+    # ('median', os.path.join(ROOT_PATH_SUPERVISED, 'train_configs', 'PhysNet',  'median',  'multimodal', 'add_8_imu')),
+    # ('median', os.path.join(ROOT_PATH_SUPERVISED, 'train_configs', 'PhysNet',  'median',  'multimodal', 'add_8_quaternion')),
+    # ('median', os.path.join(ROOT_PATH_SUPERVISED, 'train_configs', 'PhysNet',  'median',  'multimodal', 'cat_10_imu')),
+    # ('median', os.path.join(ROOT_PATH_SUPERVISED, 'train_configs', 'PhysNet',  'median',  'multimodal', 'cat_10_quaternion')),
+    # ('median', os.path.join(ROOT_PATH_SUPERVISED, 'train_configs', 'PhysNet',  'median',  'multimodal', 'cat_2_imu')),
+    # ('median', os.path.join(ROOT_PATH_SUPERVISED, 'train_configs', 'PhysNet',  'median',  'multimodal', 'cat_2_quaternion')),
+    # ('median', os.path.join(ROOT_PATH_SUPERVISED, 'train_configs', 'PhysNet',  'median',  'multimodal', 'cat_4_imu')),
+    # ('median', os.path.join(ROOT_PATH_SUPERVISED, 'train_configs', 'PhysNet',  'median',  'multimodal', 'cat_4_quaternion')),
+    # ('median', os.path.join(ROOT_PATH_SUPERVISED, 'train_configs', 'PhysNet',  'median',  'multimodal', 'cat_8_imu')),
+    # ('median', os.path.join(ROOT_PATH_SUPERVISED, 'train_configs', 'PhysNet',  'median',  'multimodal', 'cat_8_quaternion')),
+    # ('median', os.path.join(ROOT_PATH_SUPERVISED, 'train_configs', 'PhysNet',  'median',  'multimodal', 'cross_attention_10_imu')),
+    # ('median', os.path.join(ROOT_PATH_SUPERVISED, 'train_configs', 'PhysNet',  'median',  'multimodal', 'cross_attention_10_quaternion')),
+    # ('median', os.path.join(ROOT_PATH_SUPERVISED, 'train_configs', 'PhysNet',  'median',  'multimodal', 'cross_attention_2_imu')),
+    # ('median', os.path.join(ROOT_PATH_SUPERVISED, 'train_configs', 'PhysNet',  'median',  'multimodal', 'cross_attention_2_quaternion')),
+    # ('median', os.path.join(ROOT_PATH_SUPERVISED, 'train_configs', 'PhysNet',  'median',  'multimodal', 'cross_attention_4_imu')),
+    # ('median', os.path.join(ROOT_PATH_SUPERVISED, 'train_configs', 'PhysNet',  'median',  'multimodal', 'cross_attention_4_quaternion')),
+    # ('median', os.path.join(ROOT_PATH_SUPERVISED, 'train_configs', 'PhysNet',  'median',  'multimodal', 'cross_attention_8_imu')),
+    # ('median', os.path.join(ROOT_PATH_SUPERVISED, 'train_configs', 'PhysNet',  'median',  'multimodal', 'cross_attention_8_quaternion')),
+    ('median', os.path.join(ROOT_PATH_SUPERVISED, 'train_configs', 'PhysNet',  'median',  'multimodal', 'cross_attention_2_4_8_10_imu')),
+    ('median', os.path.join(ROOT_PATH_SUPERVISED, 'train_configs', 'PhysNet',  'median',  'multimodal', 'cross_attention_skip_8_imu')),
 
-    # ('median', os.path.join(ROOT_PATH_SUPERVISED, 'train_configs', 'DeepPhys',                         'median',                       'pxt1',     generate_folder_structure(dim=72,  clip_length=128, data_type='DiffNormalized_Standardized', is_unsupervised=False),              'saved_test_outputs')),
-    # ('median', os.path.join(ROOT_PATH_SUPERVISED, 'train_configs', 'DeepPhys',                         'median',                       'pxt1stat', generate_folder_structure(dim=72,  clip_length=128, data_type='DiffNormalized_Standardized', is_unsupervised=False),              'saved_test_outputs')),
-    # ('median', os.path.join(ROOT_PATH_SUPERVISED, 'train_configs', 'DeepPhys',                         'median',                       'pxtx',     generate_folder_structure(dim=72,  clip_length=128, data_type='DiffNormalized_Standardized', is_unsupervised=False),              'saved_test_outputs')),
-    # ('median', os.path.join(ROOT_PATH_SUPERVISED, 'train_configs', 'PhysFormer',                       'median',                       'pxt1',     generate_folder_structure(dim=128, clip_length=160, data_type='Raw', is_unsupervised=False),              'saved_test_outputs')),
-    # ('median', os.path.join(ROOT_PATH_SUPERVISED, 'train_configs', 'PhysFormer',                       'median',                       'pxt1stat', generate_folder_structure(dim=128, clip_length=160, data_type='Raw', is_unsupervised=False),              'saved_test_outputs')),
-    # ('median', os.path.join(ROOT_PATH_SUPERVISED, 'train_configs', 'PhysFormer',                       'median',                       'pxtx',     generate_folder_structure(dim=128, clip_length=160, data_type='Raw', is_unsupervised=False),              'saved_test_outputs')),
-    # ('median', os.path.join(ROOT_PATH_SUPERVISED, 'train_configs', 'PhysNet',                          'median',                       'pxt1',     generate_folder_structure(dim=128, clip_length=128, data_type='Raw', is_unsupervised=False),              'saved_test_outputs')),
-    # ('median', os.path.join(ROOT_PATH_SUPERVISED, 'train_configs', 'PhysNet',                          'median',                       'pxt1stat', generate_folder_structure(dim=128, clip_length=128, data_type='Raw', is_unsupervised=False),              'saved_test_outputs')),
-    # ('median', os.path.join(ROOT_PATH_SUPERVISED, 'train_configs', 'PhysNet',                          'median',                       'pxtx',     generate_folder_structure(dim=128, clip_length=128, data_type='Raw', is_unsupervised=False),              'saved_test_outputs')),
-    # ('median', os.path.join(ROOT_PATH_SUPERVISED, 'train_configs', 'Tscan',                            'median',                       'pxt1',     generate_folder_structure(dim=72,  clip_length=128, data_type='DiffNormalized_Standardized', is_unsupervised=False),              'saved_test_outputs')),
-    # ('median', os.path.join(ROOT_PATH_SUPERVISED, 'train_configs', 'Tscan',                            'median',                       'pxt1stat', generate_folder_structure(dim=72,  clip_length=128, data_type='DiffNormalized_Standardized', is_unsupervised=False),              'saved_test_outputs')),
-    # ('median', os.path.join(ROOT_PATH_SUPERVISED, 'train_configs', 'Tscan',                            'median',                       'pxtx',     generate_folder_structure(dim=72,  clip_length=128, data_type='DiffNormalized_Standardized', is_unsupervised=False),              'saved_test_outputs')),
-    # ('median', os.path.join(ROOT_PATH_SUPERVISED, 'train_configs', 'iBVPNet',                          'median',                       'pxt1',     generate_folder_structure(dim=128, clip_length=128, data_type='Raw', is_unsupervised=False),              'saved_test_outputs')),
-    # ('median', os.path.join(ROOT_PATH_SUPERVISED, 'train_configs', 'iBVPNet',                          'median',                       'pxt1stat', generate_folder_structure(dim=128, clip_length=128, data_type='Raw', is_unsupervised=False),              'saved_test_outputs')),
-    # ('median', os.path.join(ROOT_PATH_SUPERVISED, 'train_configs', 'iBVPNet',                          'median',                       'pxtx',     generate_folder_structure(dim=128, clip_length=128, data_type='Raw', is_unsupervised=False),              'saved_test_outputs')),
-
-    # ('median', os.path.join(ROOT_PATH_SUPERVISED, 'train_configs', 'PhysFormer',                       'median',   'diffnormalized',   'pxt1',     generate_folder_structure(dim=128, clip_length=160, data_type='DiffNormalized', is_unsupervised=False),   'saved_test_outputs')),
-    # ('median', os.path.join(ROOT_PATH_SUPERVISED, 'train_configs', 'PhysFormer',                       'median',   'diffnormalized',   'pxt1stat', generate_folder_structure(dim=128, clip_length=160, data_type='DiffNormalized', is_unsupervised=False),   'saved_test_outputs')),
-    # ('median', os.path.join(ROOT_PATH_SUPERVISED, 'train_configs', 'PhysFormer',                       'median',   'diffnormalized',   'pxtx',     generate_folder_structure(dim=128, clip_length=160, data_type='DiffNormalized', is_unsupervised=False),   'saved_test_outputs')),
-    # ('median', os.path.join(ROOT_PATH_SUPERVISED, 'train_configs', 'PhysNet',                          'median',   'diffnormalized',   'pxt1',     generate_folder_structure(dim=128, clip_length=128, data_type='DiffNormalized', is_unsupervised=False),   'saved_test_outputs')),
-    # ('median', os.path.join(ROOT_PATH_SUPERVISED, 'train_configs', 'PhysNet',                          'median',   'diffnormalized',   'pxt1stat', generate_folder_structure(dim=128, clip_length=128, data_type='DiffNormalized', is_unsupervised=False),   'saved_test_outputs')),
-    # ('median', os.path.join(ROOT_PATH_SUPERVISED, 'train_configs', 'PhysNet',                          'median',   'diffnormalized',   'pxtx',     generate_folder_structure(dim=128, clip_length=128, data_type='DiffNormalized', is_unsupervised=False),   'saved_test_outputs')),
-    # ('median', os.path.join(ROOT_PATH_SUPERVISED, 'train_configs', 'iBVPNet',                          'median',   'diffnormalized',   'pxt1',     generate_folder_structure(dim=128, clip_length=128, data_type='DiffNormalized', is_unsupervised=False),   'saved_test_outputs')),
-    # ('median', os.path.join(ROOT_PATH_SUPERVISED, 'train_configs', 'iBVPNet',                          'median',   'diffnormalized',   'pxt1stat', generate_folder_structure(dim=128, clip_length=128, data_type='DiffNormalized', is_unsupervised=False),   'saved_test_outputs')),
-    # ('median', os.path.join(ROOT_PATH_SUPERVISED, 'train_configs', 'iBVPNet',                          'median',   'diffnormalized',   'pxtx',     generate_folder_structure(dim=128, clip_length=128, data_type='DiffNormalized', is_unsupervised=False),   'saved_test_outputs')),
 ]
 
 
@@ -176,15 +169,15 @@ def plot_boxenplot_metrics(x, y_list, hue, data, palette, output_path, plot_name
             ])
         annotator.apply_and_annotate()
 
-        plt.title(title)
+        # plt.title(title)
         plt.ylabel(ylabel)
         plt.xlabel(xlabel)
-        plt.legend(title=legend_title)
+        plt.legend(title=legend_title, loc='upper right')
         plt.tight_layout()
         import warnings
         from matplotlib.cbook.deprecation import MatplotlibDeprecationWarning
         warnings.filterwarnings("ignore", category=MatplotlibDeprecationWarning)
-        plt.savefig(os.path.join(output_path, f'{method}_{y}_{plot_name}_boxen_plot.png'))
+        plt.savefig(os.path.join(output_path, f'{method}_{y}_{plot_name}_boxen_plot.pdf'))
         plt.close()
 
 
@@ -263,6 +256,8 @@ def generate_stationary_camera_plots(df, method, output_path, smoothing_method):
             'abs_err_peak': 'Absolute Error (Peak)',
             'macc': 'Maximum Amplitude of Cross Correlation (MACC)',
             'camera_proximity': 'Camera Proximity Comparison',
+            'Camera Type': 'Camera Position',
+            'Subject Motion': 'Participant Activity',
         })
     
 
@@ -284,6 +279,8 @@ def generate_head_movement_comparison_plots(df, method, output_path, smoothing_m
             'abs_err_peak': 'Absolute Error (Peak)',
             'macc': 'Maximum Amplitude of Cross Correlation (MACC)',
             'head_movement': 'Head Movement Comparison',
+            'Camera Type': 'Researcher Activity',
+            'Subject Motion': 'Participant Activity',
         })
 
 def generate_boxen_plots(df, method, output_path, smoothing_method):
@@ -292,10 +289,10 @@ def generate_boxen_plots(df, method, output_path, smoothing_method):
     
     subject_motion_map = {
         'T1': 'Still',
-        'T2': 'Natural Movements',
-        'T3': 'Natural Movements',
+        'T2': 'Talking',
+        'T3': 'Talking',
         'T5': 'Still',
-        'T6': 'Natural Movements'
+        'T6': 'Talking'
     }
     def map_camera_type(row):
         if row['CAM'] == 'stat' and row['TID'] in ['T1', 'T2','T3']: 
